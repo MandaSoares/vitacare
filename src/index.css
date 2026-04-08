@@ -1,0 +1,128 @@
+/* Global styles for the VitaCare landing page application */
+/* Includes Tailwind CSS imports and custom CSS variables for theming */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 30% 96%;
+    --foreground: 150 20% 15%;
+
+    --card: 40 25% 99%;
+    --card-foreground: 150 20% 15%;
+
+    --popover: 40 25% 99%;
+    --popover-foreground: 150 20% 15%;
+
+    --primary: 153 50% 22%;
+    --primary-foreground: 40 30% 96%;
+
+    --secondary: 40 20% 92%;
+    --secondary-foreground: 150 20% 15%;
+
+    --muted: 40 15% 92%;
+    --muted-foreground: 150 10% 45%;
+
+    --accent: 145 45% 38%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 153 50% 22%;
+
+    --radius: 0.75rem;
+
+    --clinical-50: 40 20% 96%;
+    --clinical-100: 40 20% 92%;
+    --clinical-500: 153 50% 22%;
+    --clinical-600: 153 50% 18%;
+    --clinical-900: 150 20% 15%;
+
+    --sidebar-background: 40 25% 97%;
+    --sidebar-foreground: 150 15% 26%;
+    --sidebar-primary: 153 50% 22%;
+    --sidebar-primary-foreground: 40 30% 96%;
+    --sidebar-accent: 40 15% 94%;
+    --sidebar-accent-foreground: 150 15% 26%;
+    --sidebar-border: 40 15% 88%;
+    --sidebar-ring: 153 50% 22%;
+  }
+
+  .dark {
+    --background: 150 15% 8%;
+    --foreground: 40 15% 95%;
+    --card: 150 15% 10%;
+    --card-foreground: 40 15% 95%;
+    --popover: 150 15% 10%;
+    --popover-foreground: 40 15% 95%;
+    --primary: 153 45% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 150 10% 15%;
+    --secondary-foreground: 40 15% 95%;
+    --muted: 150 10% 15%;
+    --muted-foreground: 150 8% 55%;
+    --accent: 145 45% 38%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 150 10% 18%;
+    --input: 150 10% 18%;
+    --ring: 153 45% 45%;
+    --sidebar-background: 150 10% 10%;
+    --sidebar-foreground: 40 10% 95%;
+    --sidebar-primary: 153 45% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 8% 16%;
+    --sidebar-accent-foreground: 40 10% 95%;
+    --sidebar-border: 150 8% 16%;
+    --sidebar-ring: 153 45% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    letter-spacing: -0.04em;
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  .font-mono-data {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  }
+
+  .glass-card-elevated {
+    @apply bg-card/90 backdrop-blur-xl border border-border/50;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
