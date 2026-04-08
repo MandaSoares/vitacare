@@ -1,5 +1,11 @@
+import Navbar from "@/components/landing/Navbar";
+
 const Index = () => {
-  return <main className="min-h-screen bg-background" />;
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+    </div>
+  );
 };
 
 export default Index;
