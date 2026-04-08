@@ -38,9 +38,5 @@ npm run dev
 
 Depois, abra no navegador o endereço exibido no terminal.
 
-## Estratégia de branches
 
-- `main`: estrutura base do projeto
-- `as-landing-page`: desenvolvimento da Hero Section, seção de Funcionalidades e seção Como Funciona
-- `mm-landing-page`: desenvolvimento das seções Nutricionistas, Depoimentos, Call to Action e Footer
 
