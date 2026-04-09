@@ -3,6 +3,9 @@ import FeaturesSection from "@/components/landing/FeaturesSection";
 import HeroSection from "@/components/landing/HeroSection";
 import Navbar from "@/components/landing/Navbar";
 import NutritionistsSection from "@/components/landing/NutritionistSection";
+import Footer from "@/components/landing/Footer";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import CTASection from "@/components/landing/CTASection";
 
 const Index = () => {
   return (
@@ -12,6 +15,9 @@ const Index = () => {
       <FeaturesSection />
       <HowItWorksSection />
       <NutritionistsSection />
+      <TestimonialsSection />
+      <CTASection />
+      <Footer />
     </div>
   );
 };
