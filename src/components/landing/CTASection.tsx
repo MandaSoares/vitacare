@@ -25,11 +25,11 @@ const CTASection = () => {
             Seja paciente buscando resultados ou nutricionista buscando escala — o VitaCare é para você.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="hero" size="xl" onClick={() => navigate("/auth")}>
+            <Button variant="hero" size="xl" onClick={() => navigate("/login")}>
               Começar agora
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
-            <Button variant="heroOutline" size="xl" onClick={() => navigate("/auth")}>
+            <Button variant="heroOutline" size="xl" onClick={() => navigate("/register")}>
               Sou Nutricionista
             </Button>
           </div>
