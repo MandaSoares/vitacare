@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Activity } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const sections = [
   { id: "features", label: "Funcionalidades" },
@@ -11,6 +12,7 @@ const sections = [
 ];
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
@@ -64,7 +66,7 @@ const Navbar = () => {
           <Button variant="ghost" size="sm" onClick={() => {}}>
             Entrar
           </Button>
-          <Button variant="default" size="sm" onClick={() => {}}>
+          <Button variant="default" size="sm" onClick={() => navigate("/register")}>
             Cadastrar
           </Button>
         </div>
