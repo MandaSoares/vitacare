@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import RadarChart from "./RadarChart";
@@ -13,7 +14,8 @@ const healthIndicators = [
 ];
 
 const HeroSection = () => {
-  const noop = () => undefined;
+  const navigate = useNavigate();
+  const goToLogin = () => navigate("/login");
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -42,11 +44,11 @@ const HeroSection = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button variant="hero" size="xl" onClick={noop}>
+            <Button variant="hero" size="xl" onClick={goToLogin}>
               Começar como Paciente
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
-            <Button variant="heroOutline" size="xl" onClick={noop}>
+            <Button variant="heroOutline" size="xl" onClick={goToLogin}>
               Para Profissionais
             </Button>
           </div>
