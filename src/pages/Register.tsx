@@ -903,6 +903,7 @@ const Register = () => {
                   <Input
                     id="fullName"
                     placeholder={isNutritionist ? "Ex: Dra. Ana Oliveira" : "Ex: Amanda Silva"}
+                    aria-invalid={errors.fullName ? "true" : "false"}
                     {...register("fullName")}
                   />
                   {renderFieldError("fullName")}
@@ -914,6 +915,7 @@ const Register = () => {
                     id="email"
                     type="email"
                     placeholder={isNutritionist ? "profissional@email.com" : "paciente@email.com"}
+                    aria-invalid={errors.email ? "true" : "false"}
                     {...register("email")}
                   />
                   {renderFieldError("email")}
@@ -925,6 +927,7 @@ const Register = () => {
                     id="emailConfirmation"
                     type="email"
                     placeholder="Repita o email"
+                    aria-invalid={errors.emailConfirmation ? "true" : "false"}
                     {...register("emailConfirmation")}
                   />
                   {renderFieldError("emailConfirmation")}
@@ -932,7 +935,13 @@ const Register = () => {
 
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="password">Senha</Label>
-                  <Input id="password" type="password" placeholder="Mínimo 6 caracteres" {...register("password")} />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Mínimo 6 caracteres"
+                    aria-invalid={errors.password ? "true" : "false"}
+                    {...register("password")}
+                  />
                   {renderFieldError("password")}
                 </div>
 
@@ -940,13 +949,23 @@ const Register = () => {
                   <>
                     <div className="space-y-2">
                       <Label htmlFor="crn">CRN</Label>
-                      <Input id="crn" placeholder="CRN-1 12345" {...register("crn")} />
+                      <Input
+                        id="crn"
+                        placeholder="CRN-1 12345"
+                        aria-invalid={errors.crn ? "true" : "false"}
+                        {...register("crn")}
+                      />
                       {renderFieldError("crn")}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefone</Label>
-                      <Input id="phone" placeholder="(11) 98765-4321" {...register("phone")} />
+                      <Input
+                        id="phone"
+                        placeholder="(11) 98765-4321"
+                        aria-invalid={errors.phone ? "true" : "false"}
+                        {...register("phone")}
+                      />
                       {renderFieldError("phone")}
                     </div>
                   </>
@@ -961,7 +980,12 @@ const Register = () => {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="specialty">Especialidade principal</Label>
-                      <Input id="specialty" placeholder="Ex: Nutrição clínica" {...register("specialty")} />
+                      <Input
+                        id="specialty"
+                        placeholder="Ex: Nutrição clínica"
+                        aria-invalid={errors.specialty ? "true" : "false"}
+                        {...register("specialty")}
+                      />
                       {renderFieldError("specialty")}
                     </div>
 
@@ -1048,7 +1072,12 @@ const Register = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="formationPrimary">Formação principal</Label>
-                      <Input id="formationPrimary" placeholder="Graduação em Nutrição - Universidade..." {...register("formationPrimary")} />
+                      <Input
+                        id="formationPrimary"
+                        placeholder="Graduação em Nutrição - Universidade..."
+                        aria-invalid={errors.formationPrimary ? "true" : "false"}
+                        {...register("formationPrimary")}
+                      />
                       {renderFieldError("formationPrimary")}
                     </div>
 
@@ -1065,25 +1094,48 @@ const Register = () => {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="serviceFirst">Primeira consulta (R$)</Label>
-                      <Input id="serviceFirst" type="number" placeholder="150" {...register("serviceFirst")} />
+                      <Input
+                        id="serviceFirst"
+                        type="number"
+                        placeholder="150"
+                        aria-invalid={errors.serviceFirst ? "true" : "false"}
+                        {...register("serviceFirst")}
+                      />
                       {renderFieldError("serviceFirst")}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="serviceReturn">Retorno nutricional (R$)</Label>
-                      <Input id="serviceReturn" type="number" placeholder="90" {...register("serviceReturn")} />
+                      <Input
+                        id="serviceReturn"
+                        type="number"
+                        placeholder="90"
+                        aria-invalid={errors.serviceReturn ? "true" : "false"}
+                        {...register("serviceReturn")}
+                      />
                       {renderFieldError("serviceReturn")}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="servicePlan">Plano alimentar personalizado (R$)</Label>
-                      <Input id="servicePlan" type="number" placeholder="180" {...register("servicePlan")} />
+                      <Input
+                        id="servicePlan"
+                        type="number"
+                        placeholder="180"
+                        aria-invalid={errors.servicePlan ? "true" : "false"}
+                        {...register("servicePlan")}
+                      />
                       {renderFieldError("servicePlan")}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="serviceBioimpedance">Bioimpedância</Label>
-                      <Input id="serviceBioimpedance" placeholder="Ex: Incluso na consulta" {...register("serviceBioimpedance")} />
+                      <Input
+                        id="serviceBioimpedance"
+                        placeholder="Ex: Incluso na consulta"
+                        aria-invalid={errors.serviceBioimpedance ? "true" : "false"}
+                        {...register("serviceBioimpedance")}
+                      />
                       {renderFieldError("serviceBioimpedance")}
                     </div>
                   </div>
@@ -1118,7 +1170,12 @@ const Register = () => {
                     {selectedExpertise.includes("Outra") ? (
                       <div className="space-y-2">
                         <Label htmlFor="otherExpertise">Outra área de atuação</Label>
-                        <Input id="otherExpertise" placeholder="Descreva a área" {...register("otherExpertise")} />
+                        <Input
+                          id="otherExpertise"
+                          placeholder="Descreva a área"
+                          aria-invalid={errors.otherExpertise ? "true" : "false"}
+                          {...register("otherExpertise")}
+                        />
                         {renderFieldError("otherExpertise")}
                       </div>
                     ) : null}
@@ -1142,7 +1199,12 @@ const Register = () => {
                     {selectedPlans.includes("Outra") ? (
                       <div className="space-y-2">
                         <Label htmlFor="otherPlan">Outro plano aceito</Label>
-                        <Input id="otherPlan" placeholder="Digite o nome do plano" {...register("otherPlan")} />
+                        <Input
+                          id="otherPlan"
+                          placeholder="Digite o nome do plano"
+                          aria-invalid={errors.otherPlan ? "true" : "false"}
+                          {...register("otherPlan")}
+                        />
                         {renderFieldError("otherPlan")}
                       </div>
                     ) : null}
@@ -1247,19 +1309,37 @@ const Register = () => {
                   <div className="grid gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
                       <Label htmlFor="patientWeight">Peso (kg)</Label>
-                      <Input id="patientWeight" type="number" placeholder="Ex: 68" {...register("patientWeight")} />
+                      <Input
+                        id="patientWeight"
+                        type="number"
+                        placeholder="Ex: 68"
+                        aria-invalid={errors.patientWeight ? "true" : "false"}
+                        {...register("patientWeight")}
+                      />
                       {renderFieldError("patientWeight")}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="patientHeight">Altura (cm)</Label>
-                      <Input id="patientHeight" type="number" placeholder="Ex: 172" {...register("patientHeight")} />
+                      <Input
+                        id="patientHeight"
+                        type="number"
+                        placeholder="Ex: 172"
+                        aria-invalid={errors.patientHeight ? "true" : "false"}
+                        {...register("patientHeight")}
+                      />
                       {renderFieldError("patientHeight")}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="patientAge">Idade</Label>
-                      <Input id="patientAge" type="number" placeholder="Ex: 29" {...register("patientAge")} />
+                      <Input
+                        id="patientAge"
+                        type="number"
+                        placeholder="Ex: 29"
+                        aria-invalid={errors.patientAge ? "true" : "false"}
+                        {...register("patientAge")}
+                      />
                       {renderFieldError("patientAge")}
                     </div>
                   </div>
