@@ -1,12 +1,20 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Activity, ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole, Mail } from "lucide-react";
+import { Activity, ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole, Mail, ShieldCheck, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
@@ -18,12 +26,17 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+const dualRoleEmails = new Set(["nutri.paciente@vitacare.com", "dual@vitacare.com"]);
+
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [accountChoiceOpen, setAccountChoiceOpen] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -34,13 +47,81 @@ const Login = () => {
   });
 
   const onSubmit = async () => {
+    const email = getValues("email").trim().toLowerCase();
+
+    if (dualRoleEmails.has(email)) {
+      setPendingEmail(email);
+      setAccountChoiceOpen(true);
+      return;
+    }
+
     toast.success("Formulário validado", {
       description: "Os dados informados estão prontos para autenticação.",
     });
   };
 
+  const handleAccountChoice = (role: "patient" | "nutritionist") => {
+    const roleLabel = role === "patient" ? "paciente" : "nutricionista";
+
+    toast.success(`Entrando como ${roleLabel}`, {
+      description: `Usando a conta vinculada a ${pendingEmail}.`,
+    });
+
+    setAccountChoiceOpen(false);
+    setPendingEmail("");
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+    <>
+      <Dialog open={accountChoiceOpen} onOpenChange={setAccountChoiceOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Escolha como deseja entrar</DialogTitle>
+            <DialogDescription>
+              Encontramos um email que pode acessar as contas de paciente e nutricionista.
+              Selecione o perfil que deseja usar nesta entrada.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => handleAccountChoice("patient")}
+              className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border bg-background p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5"
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <User className="h-5 w-5" />
+              </span>
+              <div className="mt-6 space-y-1">
+                <p className="font-semibold text-foreground">Entrar como paciente</p>
+                <p className="text-sm text-muted-foreground">Acessar a jornada, histórico e acompanhamento.</p>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleAccountChoice("nutritionist")}
+              className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border bg-background p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5"
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <ShieldCheck className="h-5 w-5" />
+              </span>
+              <div className="mt-6 space-y-1">
+                <p className="font-semibold text-foreground">Entrar como nutricionista</p>
+                <p className="text-sm text-muted-foreground">Acessar o painel profissional e os atendimentos.</p>
+              </div>
+            </button>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setAccountChoiceOpen(false)}>
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <div className="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[1.05fr_0.95fr]">
       <aside className="relative hidden overflow-hidden bg-[#1d6946] text-white lg:flex lg:flex-col lg:justify-between">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.1),transparent_28%),radial-gradient(circle_at_80%_74%,rgba(255,255,255,0.12),transparent_24%)]" />
 
@@ -161,7 +242,8 @@ const Login = () => {
           </p>
         </div>
       </main>
-    </div>
+      </div>
+    </>
   );
 };
 
