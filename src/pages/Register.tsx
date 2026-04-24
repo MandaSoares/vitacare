@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Activity, ArrowLeft, Check, ImagePlus, Stethoscope, User, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, type Path } from "react-hook-form";
 import { z } from "zod";
 
@@ -432,6 +432,7 @@ const profiles = [
 ];
 
 const Register = () => {
+  const navigate = useNavigate();
   const [selectedProfile, setSelectedProfile] = useState<"patient" | "nutritionist" | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
@@ -669,6 +670,8 @@ const Register = () => {
 
   const onSubmit = () => {
     toast.success("Cadastro concluido com sucesso");
+
+    navigate("/dashboard", { replace: true });
   };
 
   const handleNext = async () => {
