@@ -162,10 +162,10 @@ const Login = () => {
       </aside>
 
       <main className="flex min-h-screen items-center justify-center px-5 py-8 sm:px-8 lg:px-10">
-        <div className="w-full max-w-md lg:max-w-[520px]">
+        <div className="w-full max-w-xl rounded-[2rem] border border-border/70 bg-background/95 p-6 shadow-[0_20px_80px_rgba(0,0,0,0.08)] backdrop-blur sm:p-10">
           <Link
             to="/"
-            className="mb-10 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="mb-8 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Voltar ao site
