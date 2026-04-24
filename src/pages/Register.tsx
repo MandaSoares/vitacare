@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Activity, ArrowLeft, Check, ImagePlus, Stethoscope, User, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Activity, ArrowLeft, Check, ImagePlus, LoaderCircle, Stethoscope, User, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, type Path } from "react-hook-form";
 import { z } from "zod";
 
@@ -416,6 +416,66 @@ const registerSchema = z
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
+type RegisterSuccessResponse = {
+  status: 200 | 201;
+  message: string;
+};
+
+type RegisterErrorResponse = {
+  status: 400 | 409 | 500;
+  message: string;
+};
+
+const simulateRegisterApi = async (values: RegisterFormValues): Promise<RegisterSuccessResponse> => {
+  await new Promise((resolve) => setTimeout(resolve, 900));
+
+  const normalizedEmail = values.email.trim().toLowerCase();
+
+  if (normalizedEmail.includes("400")) {
+    throw {
+      status: 400,
+      message: "Dados inválidos. Revise os campos e tente novamente.",
+    } satisfies RegisterErrorResponse;
+  }
+
+  if (normalizedEmail.includes("409")) {
+    throw {
+      status: 409,
+      message: "Este e-mail já está em uso.",
+    } satisfies RegisterErrorResponse;
+  }
+
+  if (normalizedEmail.includes("500")) {
+    throw {
+      status: 500,
+      message: "Erro interno do servidor. Tente novamente em instantes.",
+    } satisfies RegisterErrorResponse;
+  }
+
+  return {
+    status: 201,
+    message: "Conta criada com sucesso!",
+  };
+};
+
+const isRegisterErrorResponse = (error: unknown): error is RegisterErrorResponse => {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  if (!("status" in error) || !("message" in error)) {
+    return false;
+  }
+
+  const status = (error as { status: unknown }).status;
+  const message = (error as { message: unknown }).message;
+
+  return (
+    typeof message === "string" &&
+    (status === 400 || status === 409 || status === 500)
+  );
+};
+
 const profiles = [
   {
     icon: User,
@@ -432,8 +492,10 @@ const profiles = [
 ];
 
 const Register = () => {
+  const navigate = useNavigate();
   const [selectedProfile, setSelectedProfile] = useState<"patient" | "nutritionist" | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const [availableCities, setAvailableCities] = useState<string[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [availabilityOpenDay, setAvailabilityOpenDay] = useState<WeekDayField | null>(null);
@@ -667,8 +729,34 @@ const Register = () => {
     return <p className="text-xs font-medium text-destructive">{message}</p>;
   };
 
-  const onSubmit = () => {
-    toast.success("Cadastro concluido com sucesso");
+  const onSubmit = async (values: RegisterFormValues) => {
+    setIsRegisterLoading(true);
+
+    try {
+      const response = await simulateRegisterApi(values);
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success(response.message);
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      toast.error("Não foi possível concluir o cadastro", {
+        description: "Recebemos uma resposta inesperada do servidor.",
+      });
+    } catch (error) {
+      if (isRegisterErrorResponse(error)) {
+        toast.error("Falha no cadastro", {
+          description: error.message,
+        });
+      } else {
+        toast.error("Falha no cadastro", {
+          description: "Não foi possível comunicar com o servidor. Tente novamente.",
+        });
+      }
+    } finally {
+      setIsRegisterLoading(false);
+    }
   };
 
   const handleNext = async () => {
@@ -1702,10 +1790,11 @@ const Register = () => {
               ) : (
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isRegisterLoading}
                   className="h-12 rounded-xl bg-[#1d6946] text-white shadow-none hover:bg-[#165637]"
                 >
-                  Finalizar cadastro
+                  {isRegisterLoading ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isRegisterLoading ? "Finalizando..." : "Finalizar cadastro"}
                 </Button>
               )}
             </div>
