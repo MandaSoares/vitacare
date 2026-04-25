@@ -1,12 +1,12 @@
-import { useState } from "react"; 
-  
+import { useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod"; 
 import { Activity, ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole, Mail, 
 ShieldCheck, User } from "lucide-react"; 
-import { Link } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import { useForm } from "react-hook-form"; 
 import { z } from "zod"; 
   
+import { useAuth } from "@/contexts/AuthContext"; 
 import { Button } from "@/components/ui/button"; 
 import { 
   Dialog, 
@@ -27,67 +27,13 @@ const loginSchema = z.object({
   
 type LoginFormValues = z.infer<typeof loginSchema>; 
   
-type LoginSuccessResponse = { 
-  status: 200; 
-  message: string; 
-}; 
-  
-type LoginErrorResponse = { 
-  status: 400 | 401 | 500; 
-  message: string; 
-}; 
-  
-const dualRoleEmails = new Set(["nutri.paciente@vitacare.com", "dual@vitacare.com"]); 
-  
-const simulateLoginApi = async (email: string, password: string): 
-Promise<LoginSuccessResponse> => { 
-  await new Promise((resolve) => setTimeout(resolve, 900)); 
-  
-  const normalizedEmail = email.trim().toLowerCase(); 
-  
-  if (normalizedEmail.includes("500")) { 
-    throw { 
-      status: 500, 
-      message: "Servidor indisponível no momento.", 
-    } satisfies LoginErrorResponse; 
-  } 
-  
-  if (!password || password.length < 6) { 
-    throw { 
-      status: 400, 
-      message: "Senha inválida. Use pelo menos 6 caracteres.", 
-    } satisfies LoginErrorResponse; 
-  } 
-  
-  if (password !== "123456") { 
-    throw { 
-      status: 401, 
-      message: "E-mail ou senha incorretos.", 
-    } satisfies LoginErrorResponse; 
-  } 
-  
-  return { 
-    status: 200, 
-    message: "Login realizado com sucesso.", 
-  }; 
-}; 
-  
-const isLoginErrorResponse = (error: unknown): error is LoginErrorResponse => { 
-  if (!error || typeof error !== "object") { 
-    return false; 
-  } 
-  
-  if (!("status" in error) || !("message" in error)) { 
-    return false; 
-  } 
-  
-  const status = (error as { status: unknown }).status; 
-  const message = (error as { message: unknown }).message; 
-  
-  return typeof message === "string" && (status === 400 || status === 401 || status === 500); 
-}; 
+const dualRoleEmails = new Set(["nutri.paciente@vitacare.com", 
+"dual@vitacare.com"]); 
   
 const Login = () => { 
+  const navigate = useNavigate(); 
+  const { signIn } = useAuth(); 
+  
   const [showPassword, setShowPassword] = useState(false); 
   const [accountChoiceOpen, setAccountChoiceOpen] = useState(false); 
   const [pendingEmail, setPendingEmail] = useState(""); 
@@ -96,7 +42,6 @@ const Login = () => {
     register, 
     handleSubmit, 
     getValues, 
-    setValue, 
     formState: { errors, isSubmitting }, 
   } = useForm<LoginFormValues>({ 
     resolver: zodResolver(loginSchema), 
@@ -108,37 +53,32 @@ const Login = () => {
   
   const onSubmit = async () => { 
     const email = getValues("email").trim().toLowerCase(); 
-    const password = getValues("password"); 
   
-    try { 
-      const response = await simulateLoginApi(email, password); 
-  
-      if (dualRoleEmails.has(email)) { 
-        setPendingEmail(email); 
-        setAccountChoiceOpen(true); 
-        return; 
-      } 
-  
-      toast.success(response.message, { 
-        description: "Os dados informados estão prontos para autenticação.", 
-      }); 
-    } catch (error) { 
-      if (isLoginErrorResponse(error)) { 
-        toast.error("Falha no login", { 
-          description: error.message, 
-        }); 
-      } else { 
-        toast.error("Falha no login", { 
-          description: "Não foi possível concluir a autenticação.", 
-        }); 
-      } 
-  
-      setValue("password", "", { shouldValidate: true }); 
+    if (dualRoleEmails.has(email)) { 
+      setPendingEmail(email); 
+      setAccountChoiceOpen(true); 
+      return; 
     } 
+  
+    signIn({ 
+      token: "mock-token", 
+      user: { email, role: "patient" }, 
+    }); 
+  
+    toast.success("Login realizado", { 
+      description: "Redirecionando para o dashboard.", 
+    }); 
+  
+    navigate("/dashboard", { replace: true }); 
   }; 
   
   const handleAccountChoice = (role: "patient" | "nutritionist") => { 
     const roleLabel = role === "patient" ? "paciente" : "nutricionista"; 
+  
+    signIn({ 
+      token: "mock-token", 
+      user: { email: pendingEmail, role }, 
+    }); 
   
     toast.success(`Entrando como ${roleLabel}`, { 
       description: `Usando a conta vinculada a ${pendingEmail}.`, 
@@ -146,6 +86,7 @@ const Login = () => {
   
     setAccountChoiceOpen(false); 
     setPendingEmail(""); 
+    navigate("/dashboard", { replace: true }); 
   }; 
   
   return ( 
@@ -157,4 +98,5 @@ const Login = () => {
     </> 
   ); 
 }; 
-export default Login; 
+  
+export default Login;
