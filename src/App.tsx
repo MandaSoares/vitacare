@@ -10,6 +10,7 @@ import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import NutritionistSearch from "./pages/NutritionistSearch.tsx";
+import PatientProfile from "./pages/PatientProfile.tsx";
 import PatientSearch from "./pages/PatientSearch.tsx";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <PatientSearch />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patients/:patientId"
+              element={
+                <ProtectedRoute>
+                  <PatientProfile />
                 </ProtectedRoute>
               }
             />
