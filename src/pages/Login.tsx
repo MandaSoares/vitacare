@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Activity, ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole, Mail, ShieldCheck, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 
 const loginSchema = z.object({
@@ -89,6 +90,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [accountChoiceOpen, setAccountChoiceOpen] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const {
     register,
@@ -120,6 +123,18 @@ const Login = () => {
       toast.success(response.message, {
         description: "Os dados informados estão prontos para autenticação.",
       });
+
+      signIn({
+        token: `auth-token-${email}`,
+        user: {
+          id: email,
+          name: email.split("@")[0],
+          email,
+          role: "nutritionist",
+        },
+      });
+
+      navigate("/dashboard");
     } catch (error) {
       if (isLoginErrorResponse(error)) {
         toast.error("Falha no login", {
@@ -142,8 +157,20 @@ const Login = () => {
       description: `Usando a conta vinculada a ${pendingEmail}.`,
     });
 
+    signIn({
+      token: `auth-token-${pendingEmail}`,
+      user: {
+        id: pendingEmail,
+        name: pendingEmail.split("@")[0],
+        email: pendingEmail,
+        role,
+      },
+    });
+
     setAccountChoiceOpen(false);
     setPendingEmail("");
+
+    navigate(role === "patient" ? "/dashboard" : "/dashboard");
   };
 
   return (
