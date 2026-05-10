@@ -98,25 +98,14 @@ const PatientDashboard: React.FC = () => {
 
             <Card>
               <CardContent>
-                <div className="flex justify-center">
-                  <div role="group" aria-label="Ações do paciente" className="inline-flex h-10 overflow-hidden rounded-md border bg-white">
-                    <Link to="/patients" className="inline-flex">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        className="rounded-none h-10 px-4"
-                        aria-label="Voltar para pacientes"
-                      >
-                        Voltar para pacientes
-                      </Button>
-                    </Link>
-                    <Button type="button" className="rounded-none h-10 px-4 border-l" aria-label="Registrar refeição" title="Registrar refeição">
-                      Registrar refeição
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Link to="/patients">
+                    <Button type="button" variant="secondary" className="w-full sm:w-auto" aria-label="Voltar para pacientes">
+                      Voltar para pacientes
                     </Button>
-                    <Button type="button" variant="outline" className="rounded-none h-10 px-4 border-l" aria-label="Ver plano nutricional" title="Ver plano nutricional">
-                      Ver plano nutricional
-                    </Button>
-                  </div>
+                  </Link>
+                  <Button type="button" className="w-full sm:w-auto" aria-label="Registrar refeição">Registrar refeição</Button>
+                  <Button type="button" variant="outline" className="w-full sm:w-auto" aria-label="Ver plano nutricional">Ver plano nutricional</Button>
                 </div>
               </CardContent>
             </Card>
