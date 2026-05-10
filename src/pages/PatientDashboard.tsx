@@ -88,7 +88,7 @@ const PatientDashboard: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <Button variant="ghost" size="sm">Ver receita</Button>
+                        <Button type="button" variant="ghost" size="sm" className="w-full sm:w-auto">Ver receita</Button>
                       </div>
                     </div>
                   ))}
@@ -99,9 +99,13 @@ const PatientDashboard: React.FC = () => {
             <Card>
               <CardContent>
                 <div className="flex flex-col gap-3 sm:flex-row">
-                  <Link to="/patients"><Button variant="secondary">Voltar para pacientes</Button></Link>
-                  <Button>Registrar refeição</Button>
-                  <Button variant="outline">Ver plano nutricional</Button>
+                  <Link to="/patients">
+                    <Button type="button" variant="secondary" className="w-full sm:w-auto">
+                      Voltar para pacientes
+                    </Button>
+                  </Link>
+                  <Button type="button" className="w-full sm:w-auto">Registrar refeição</Button>
+                  <Button type="button" variant="outline" className="w-full sm:w-auto">Ver plano nutricional</Button>
                 </div>
               </CardContent>
             </Card>
