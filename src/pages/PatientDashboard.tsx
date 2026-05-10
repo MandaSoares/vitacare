@@ -42,7 +42,6 @@ const PatientDashboard: React.FC = () => {
               <p className="text-sm text-slate-600">{samplePatient.cpf}</p>
             </div>
           </div>
-          <p className="text-slate-600">Resumo do plano, progresso e próximas refeições</p>
         </header>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -98,9 +97,6 @@ const PatientDashboard: React.FC = () => {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Ações rápidas</CardTitle>
-              </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link to="/patients"><Button variant="secondary">Voltar para pacientes</Button></Link>
