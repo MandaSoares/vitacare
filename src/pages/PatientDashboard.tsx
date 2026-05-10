@@ -97,7 +97,7 @@ const PatientDashboard: React.FC = () => {
             </Card>
 
             <Card>
-              <CardContent>
+              <CardContent className="pt-4">
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Link to="/patients">
                     <Button type="button" variant="secondary" className="w-full sm:w-auto" aria-label="Voltar para pacientes">
