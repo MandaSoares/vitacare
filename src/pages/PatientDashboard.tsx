@@ -1,5 +1,5 @@
 import React from "react";
-import { sampleMeals, sampleProgress } from "@/lib/patientDashboardData";
+import { sampleMeals, sampleProgress, samplePatient } from "@/lib/patientDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -28,8 +28,20 @@ const PatientDashboard: React.FC = () => {
   return (
     <div className="min-h-screen p-4 md:p-8 bg-slate-50">
       <div className="mx-auto max-w-5xl space-y-6">
-        <header>
-          <h1 className="text-2xl font-bold">Dashboard do paciente</h1>
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-500 text-white font-semibold">
+              {samplePatient.name
+                .split(" ")
+                .map((s) => s[0])
+                .slice(0, 2)
+                .join("")}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">{samplePatient.name}</h1>
+              <p className="text-sm text-slate-600">{samplePatient.cpf}</p>
+            </div>
+          </div>
           <p className="text-slate-600">Resumo do plano, progresso e próximas refeições</p>
         </header>
 

@@ -33,3 +33,9 @@ export const sampleProgress: NutritionProgress = {
   fatsGrams: 50,
   fatsGoal: 70,
 };
+
+export const samplePatient = {
+  id: "1",
+  name: "Ana Silva Santos",
+  cpf: "123.456.789-00",
+};
