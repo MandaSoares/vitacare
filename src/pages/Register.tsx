@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
+import { upsertStoredAccount } from "@/lib/authAccountStore";
 
 const steps = ["", "", "", ""];
 
@@ -452,9 +453,34 @@ const simulateRegisterApi = async (values: RegisterFormValues): Promise<Register
     } satisfies RegisterErrorResponse;
   }
 
+  if (!values.profileType) {
+    throw {
+      status: 400,
+      message: "Selecione um perfil para continuar.",
+    } satisfies RegisterErrorResponse;
+  }
+
+  const { account, roleAlreadyExists } = upsertStoredAccount({
+    email: normalizedEmail,
+    name: values.fullName,
+    password: values.password,
+    role: values.profileType,
+  });
+
+  if (roleAlreadyExists) {
+    const roleLabel = values.profileType === "patient" ? "paciente" : "nutricionista";
+    throw {
+      status: 409,
+      message: `Este e-mail já possui uma conta de ${roleLabel}.`,
+    } satisfies RegisterErrorResponse;
+  }
+
   return {
     status: 201,
-    message: "Conta criada com sucesso!",
+    message:
+      account.roles.length > 1
+        ? "Perfil adicional criado com sucesso no mesmo e-mail!"
+        : "Conta criada com sucesso!",
   };
 };
 
@@ -737,7 +763,7 @@ const Register = () => {
 
       if (response.status === 200 || response.status === 201) {
         toast.success(response.message);
-        navigate("/dashboard", { replace: true });
+        navigate(values.profileType === "patient" ? "/patient/dashboard" : "/dashboard", { replace: true });
         return;
       }
 

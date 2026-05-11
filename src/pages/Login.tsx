@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
+import { findStoredAccountByEmail } from "@/lib/authAccountStore";
 
 const loginSchema = z.object({
   email: z.string().trim().min(1, "Informe seu email.").email("Informe um email válido."),
@@ -30,6 +31,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type LoginSuccessResponse = {
   status: 200;
   message: string;
+  roles: Array<"patient" | "nutritionist">;
 };
 
 type LoginErrorResponse = {
@@ -65,6 +67,7 @@ const simulateLoginApi = async (email: string, password: string): Promise<LoginS
   await new Promise((resolve) => setTimeout(resolve, 900));
 
   const normalizedEmail = email.trim().toLowerCase();
+  const storedAccount = findStoredAccountByEmail(normalizedEmail);
 
   if (normalizedEmail.includes("500")) {
     throw {
@@ -80,6 +83,21 @@ const simulateLoginApi = async (email: string, password: string): Promise<LoginS
     } satisfies LoginErrorResponse;
   }
 
+  if (storedAccount) {
+    if (password !== storedAccount.password) {
+      throw {
+        status: 401,
+        message: "E-mail ou senha incorretos.",
+      } satisfies LoginErrorResponse;
+    }
+
+    return {
+      status: 200,
+      message: "Login realizado com sucesso.",
+      roles: storedAccount.roles,
+    };
+  }
+
   if (password !== "123456") {
     throw {
       status: 401,
@@ -90,6 +108,7 @@ const simulateLoginApi = async (email: string, password: string): Promise<LoginS
   return {
     status: 200,
     message: "Login realizado com sucesso.",
+    roles: dualRoleEmails.has(normalizedEmail) ? ["patient", "nutritionist"] : ["nutritionist"],
   };
 };
 
@@ -114,6 +133,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(Boolean(rememberedEmail));
   const [accountChoiceOpen, setAccountChoiceOpen] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
+  const [pendingRoles, setPendingRoles] = useState<Array<"patient" | "nutritionist">>([]);
   const navigate = useNavigate();
   const { signIn } = useAuth();
 
@@ -139,11 +159,14 @@ const Login = () => {
       const response = await simulateLoginApi(email, password);
       updateRememberedEmail(email, rememberMe);
 
-      if (dualRoleEmails.has(email)) {
+      if (response.roles.length > 1) {
         setPendingEmail(email);
+        setPendingRoles(response.roles);
         setAccountChoiceOpen(true);
         return;
       }
+
+      const role = response.roles[0] ?? "nutritionist";
 
       toast.success(response.message, {
         description: "Os dados informados estão prontos para autenticação.",
@@ -155,11 +178,11 @@ const Login = () => {
           id: email,
           name: email.split("@")[0],
           email,
-          role: "nutritionist",
+          role,
         },
       });
 
-      navigate("/dashboard");
+      navigate(role === "patient" ? "/patient/dashboard" : "/dashboard");
     } catch (error) {
       if (isLoginErrorResponse(error)) {
         toast.error("Falha no login", {
@@ -194,8 +217,9 @@ const Login = () => {
 
     setAccountChoiceOpen(false);
     setPendingEmail("");
+    setPendingRoles([]);
 
-    navigate(role === "patient" ? "/dashboard" : "/dashboard");
+    navigate(role === "patient" ? "/patient/dashboard" : "/dashboard");
   };
 
   return (
@@ -211,33 +235,37 @@ const Login = () => {
           </DialogHeader>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={() => handleAccountChoice("patient")}
-              className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border bg-background p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <User className="h-5 w-5" />
-              </span>
-              <div className="mt-6 space-y-1">
-                <p className="font-semibold text-foreground">Entrar como paciente</p>
-                <p className="text-sm text-muted-foreground">Acessar a jornada, histórico e acompanhamento.</p>
-              </div>
-            </button>
+            {pendingRoles.includes("patient") ? (
+              <button
+                type="button"
+                onClick={() => handleAccountChoice("patient")}
+                className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border bg-background p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <User className="h-5 w-5" />
+                </span>
+                <div className="mt-6 space-y-1">
+                  <p className="font-semibold text-foreground">Entrar como paciente</p>
+                  <p className="text-sm text-muted-foreground">Acessar a jornada, histórico e acompanhamento.</p>
+                </div>
+              </button>
+            ) : null}
 
-            <button
-              type="button"
-              onClick={() => handleAccountChoice("nutritionist")}
-              className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border bg-background p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5"
-            >
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <ShieldCheck className="h-5 w-5" />
-              </span>
-              <div className="mt-6 space-y-1">
-                <p className="font-semibold text-foreground">Entrar como nutricionista</p>
-                <p className="text-sm text-muted-foreground">Acessar o painel profissional e os atendimentos.</p>
-              </div>
-            </button>
+            {pendingRoles.includes("nutritionist") ? (
+              <button
+                type="button"
+                onClick={() => handleAccountChoice("nutritionist")}
+                className="flex min-h-32 flex-col items-start justify-between rounded-2xl border border-border bg-background p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <ShieldCheck className="h-5 w-5" />
+                </span>
+                <div className="mt-6 space-y-1">
+                  <p className="font-semibold text-foreground">Entrar como nutricionista</p>
+                  <p className="text-sm text-muted-foreground">Acessar o painel profissional e os atendimentos.</p>
+                </div>
+              </button>
+            ) : null}
           </div>
 
           <DialogFooter>

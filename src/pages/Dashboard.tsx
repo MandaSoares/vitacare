@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { AlertCircle, Users, Clock, TrendingUp, Plus, Search, Info } from "lucide-react";
-import { toast } from "sonner";
+import { AlertCircle, Users, Clock, TrendingUp, Plus, Search } from "lucide-react";
 
 interface Patient {
   id: string;
@@ -60,7 +59,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [patients] = useState<Patient[]>(mockPatients);
   const [activities] = useState<Activity[]>(mockActivities);
-  const [isLoadingAction, setIsLoadingAction] = useState(false);
 
   // Cálculos de estatísticas
   const activePatients = patients.filter((p) => p.status === "active").length;
@@ -80,24 +78,16 @@ const Dashboard = () => {
   };
 
   // Handlers para ações
-  const handleNewPlan = async () => {
-    setIsLoadingAction(true);
-    setTimeout(() => {
-      toast.info("Recurso em desenvolvimento", { description: "Criar novo plano em breve!" });
-      setIsLoadingAction(false);
-    }, 500);
+  const handleNewPlan = () => {
+    navigate("/nutritionist/plan/create");
   };
 
-  const handleSearchPatient = async () => {
-    setIsLoadingAction(true);
-    setTimeout(() => {
-      toast.info("Abrindo busca de pacientes...");
-      setIsLoadingAction(false);
-    }, 500);
+  const handleSearchPatient = () => {
+    navigate("/patients");
   };
 
   const handleViewAllPatients = () => {
-    toast.info("Redirecionando...", { description: "Página de pacientes em desenvolvimento" });
+    navigate("/nutritionist/plans");
   };
 
   return (
@@ -201,7 +191,7 @@ const Dashboard = () => {
             <CardContent className="flex flex-wrap gap-3">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button className="gap-2" size="sm" onClick={handleNewPlan} disabled={isLoadingAction}>
+                  <Button className="gap-2" size="sm" onClick={handleNewPlan}>
                     <Plus className="h-4 w-4" />
                     Novo Plano
                   </Button>
@@ -213,7 +203,7 @@ const Dashboard = () => {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button className="gap-2" size="sm" variant="outline" onClick={handleSearchPatient} disabled={isLoadingAction}>
+                  <Button className="gap-2" size="sm" variant="outline" onClick={handleSearchPatient}>
                     <Search className="h-4 w-4" />
                     Buscar Paciente
                   </Button>
