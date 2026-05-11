@@ -1,82 +1,14 @@
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Search, User, Calendar, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-interface Patient {
-  id: string;
-  name: string;
-  cpf: string;
-  email: string;
-  phone: string;
-  planStatus: "active" | "inactive" | "pending";
-  joinDate: string;
-  lastConsultation: string | null;
-  notes?: string;
-}
-
-// Mock data - será substituído por API
-const mockPatients: Patient[] = [
-  {
-    id: "1",
-    name: "João Silva",
-    cpf: "123.456.789-00",
-    email: "joao@email.com",
-    phone: "(11) 98765-4321",
-    planStatus: "active",
-    joinDate: "2025-01-15",
-    lastConsultation: "2026-04-20",
-    notes: "Emagrecimento, acompanhamento mensal",
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    cpf: "987.654.321-11",
-    email: "maria@email.com",
-    phone: "(11) 97654-3210",
-    planStatus: "active",
-    joinDate: "2025-02-10",
-    lastConsultation: "2026-05-05",
-    notes: "Nutrição clínica, diabetes",
-  },
-  {
-    id: "3",
-    name: "Carlos Oliveira",
-    cpf: "456.789.123-22",
-    email: "carlos@email.com",
-    phone: "(11) 96543-2109",
-    planStatus: "inactive",
-    joinDate: "2024-06-20",
-    lastConsultation: null,
-    notes: "Sem atividade há 6 meses",
-  },
-  {
-    id: "4",
-    name: "Ana Costa",
-    cpf: "789.123.456-33",
-    email: "ana@email.com",
-    phone: "(11) 95432-1098",
-    planStatus: "pending",
-    joinDate: "2026-05-01",
-    lastConsultation: null,
-    notes: "Aguardando primeira consulta",
-  },
-  {
-    id: "5",
-    name: "Roberto Ferreira",
-    cpf: "321.654.987-44",
-    email: "roberto@email.com",
-    phone: "(11) 94321-0987",
-    planStatus: "active",
-    joinDate: "2025-03-12",
-    lastConsultation: "2026-04-28",
-    notes: "Nutrição esportiva, treino",
-  },
-];
+import { mockPatients, type Patient } from "@/lib/patients";
 
 const PLAN_STATUS = [
   { value: "active", label: "Plano ativo", color: "bg-green-100 text-green-800" },
@@ -172,10 +104,9 @@ const PatientCard = ({ patient, onViewProfile }: { patient: Patient; onViewProfi
 };
 
 export const PatientSearch = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   const hasActiveFilters = searchQuery !== "" || selectedStatuses.length > 0;
 
@@ -213,9 +144,8 @@ export const PatientSearch = () => {
   };
 
   const handleViewProfile = (patient: Patient) => {
-    setSelectedPatient(patient);
-    setDialogOpen(true);
     toast.success(`Abrindo perfil de ${patient.name}`);
+    navigate(`/patients/${patient.id}`);
   };
 
   return (
@@ -370,88 +300,6 @@ export const PatientSearch = () => {
             </div>
           </div>
 
-          {/* Patient Profile Modal */}
-          {selectedPatient && dialogOpen && (
-            <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-              <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                <CardHeader className="border-b">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="h-16 w-16 rounded-full bg-secondary flex items-center justify-center">
-                        <User className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl">{selectedPatient.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-2">CPF: {selectedPatient.cpf}</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setDialogOpen(false)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6 mt-6">
-                  {/* Status */}
-                  <div>
-                    <p className="text-sm font-semibold mb-2">Status do Plano</p>
-                    {PLAN_STATUS.find((s) => s.value === selectedPatient.planStatus) && (
-                      <Badge className={PLAN_STATUS.find((s) => s.value === selectedPatient.planStatus)!.color}>
-                        {PLAN_STATUS.find((s) => s.value === selectedPatient.planStatus)!.label}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Contact */}
-                  <div>
-                    <p className="text-sm font-semibold mb-2">Contato</p>
-                    <div className="space-y-1 text-sm">
-                      <p>Email: {selectedPatient.email}</p>
-                      <p>Telefone: {selectedPatient.phone}</p>
-                    </div>
-                  </div>
-
-                  {/* Dates */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-semibold">Cadastro</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(selectedPatient.joinDate).toLocaleDateString("pt-BR")}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">Última Consulta</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedPatient.lastConsultation
-                          ? new Date(selectedPatient.lastConsultation).toLocaleDateString("pt-BR")
-                          : "Sem consultas realizadas"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Notes */}
-                  {selectedPatient.notes && (
-                    <div>
-                      <p className="text-sm font-semibold">Observações</p>
-                      <p className="text-sm text-muted-foreground">{selectedPatient.notes}</p>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1">Agendar Consulta</Button>
-                    <Button variant="outline" className="flex-1">Editar Plano</Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setDialogOpen(false)}>
-                      Fechar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
         </div>
       </main>
     </TooltipProvider>
