@@ -121,7 +121,9 @@ const PatientProfile = () => {
 
             <div className="flex flex-wrap gap-3 pt-2">
               <Button>Agendar Consulta</Button>
-              <Button variant="outline">Editar Plano</Button>
+              <Button variant="outline" asChild>
+                <Link to={`/patients/${patientId}/plan`}>Ver plano nutricional</Link>
+              </Button>
               <Button variant="ghost" onClick={() => navigate("/patients")}>
                 Voltar para a lista
               </Button>
