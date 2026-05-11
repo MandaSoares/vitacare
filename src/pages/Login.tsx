@@ -38,6 +38,28 @@ type LoginErrorResponse = {
 };
 
 const dualRoleEmails = new Set(["nutri.paciente@vitacare.com", "dual@vitacare.com"]);
+const REMEMBER_EMAIL_STORAGE_KEY = "vitacare.remember.email";
+
+const getRememberedEmail = (): string => {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return localStorage.getItem(REMEMBER_EMAIL_STORAGE_KEY) ?? "";
+};
+
+const updateRememberedEmail = (email: string, shouldRemember: boolean): void => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (shouldRemember) {
+    localStorage.setItem(REMEMBER_EMAIL_STORAGE_KEY, email);
+    return;
+  }
+
+  localStorage.removeItem(REMEMBER_EMAIL_STORAGE_KEY);
+};
 
 const simulateLoginApi = async (email: string, password: string): Promise<LoginSuccessResponse> => {
   await new Promise((resolve) => setTimeout(resolve, 900));
@@ -87,7 +109,9 @@ const isLoginErrorResponse = (error: unknown): error is LoginErrorResponse => {
 };
 
 const Login = () => {
+  const rememberedEmail = getRememberedEmail();
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(Boolean(rememberedEmail));
   const [accountChoiceOpen, setAccountChoiceOpen] = useState(false);
   const [pendingEmail, setPendingEmail] = useState("");
   const navigate = useNavigate();
@@ -102,7 +126,7 @@ const Login = () => {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: rememberedEmail,
       password: "",
     },
   });
@@ -113,6 +137,7 @@ const Login = () => {
 
     try {
       const response = await simulateLoginApi(email, password);
+      updateRememberedEmail(email, rememberMe);
 
       if (dualRoleEmails.has(email)) {
         setPendingEmail(email);
@@ -330,6 +355,22 @@ const Login = () => {
               {errors.password && <p className="text-xs font-medium text-destructive">{errors.password.message}</p>}
             </div>
 
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => {
+                  const nextValue = event.target.checked;
+                  setRememberMe(nextValue);
+                  if (!nextValue) {
+                    updateRememberedEmail("", false);
+                  }
+                }}
+                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <span>Lembrar de mim</span>
+            </label>
+
             <Button type="submit" className="h-12 w-full rounded-xl" disabled={isSubmitting}>
               {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
               Entrar
@@ -337,7 +378,7 @@ const Login = () => {
           </form>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Nao tem conta?{" "}
+            Não tem conta?{" "}
             <Link to="/register" className="font-medium text-primary hover:underline">
               Cadastre-se
             </Link>

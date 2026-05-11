@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard.tsx";
 import Index from "./pages/Index.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
 import NutritionistSearch from "./pages/NutritionistSearch.tsx";
 import PatientProfile from "./pages/PatientProfile.tsx";
 import PatientSearch from "./pages/PatientSearch.tsx";
@@ -41,6 +42,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/register" element={<Register />} />
             <Route path="/nutritionists" element={<NutritionistSearch />} />
             <Route
