@@ -1,4 +1,5 @@
 import React from "react";
+import AccountSwitcher from "@/components/AccountSwitcher";
 import { sampleMeals, sampleProgress, samplePatient } from "@/lib/patientDashboardData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -41,6 +42,11 @@ const PatientDashboard: React.FC = () => {
               <h1 className="text-2xl font-bold">{samplePatient.name}</h1>
               <p className="text-sm text-slate-600">{samplePatient.cpf}</p>
             </div>
+          </div>
+          <div>
+            <React.Suspense fallback={null}>
+              <AccountSwitcher />
+            </React.Suspense>
           </div>
         </header>
 

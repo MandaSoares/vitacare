@@ -1,9 +1,10 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import AccountSwitcher from "@/components/AccountSwitcher";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertCircle, Users, Clock, TrendingUp, Plus, Search } from "lucide-react";
 
@@ -95,9 +96,18 @@ const Dashboard = () => {
       <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-6xl space-y-8">
           {/* Header */}
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-sm text-muted-foreground">Bem-vindo de volta. Aqui está um resumo da sua carteira de pacientes.</p>
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Bem-vindo de volta. Aqui está um resumo da sua carteira de pacientes.</p>
+            </div>
+            <div>
+              {/* Account switcher when user has multiple profiles */}
+              {/* Lazy import to keep bundle small; component is lightweight */}
+              <React.Suspense fallback={null}>
+                <AccountSwitcher />
+              </React.Suspense>
+            </div>
           </div>
 
           {/* Stats Cards */}
