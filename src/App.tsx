@@ -18,8 +18,6 @@ import PlanCreator from "./pages/PlanCreator.tsx";
 import PatientNutritionPlan from "./pages/PatientNutritionPlan.tsx";
 import NutritionistPlanView from "./pages/NutritionistPlanView.tsx";
 import PatientDashboard from "./pages/PatientDashboard.tsx";
-import PlanCreator from "./pages/PlanCreator.tsx";
-import PatientNutritionPlan from "./pages/PatientNutritionPlan.tsx";
 
 
 const queryClient = new QueryClient();
@@ -98,14 +96,6 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <NutritionistPlanView />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/patients/:patientId/plan"
-              element={
-                <ProtectedRoute>
-                  <PatientNutritionPlan />
                 </ProtectedRoute>
               }
             />
