@@ -29,6 +29,32 @@ export type PatientNutritionPlan = {
   meals: PlanMeal[];
 };
 
+export type NutritionSummary = {
+  totalCalories: number;
+  totalProtein: number;
+  totalCarbs: number;
+  totalFats: number;
+};
+
+export const calculateNutritionSummary = (
+  plan: PatientNutritionPlan,
+): NutritionSummary => {
+  return plan.meals.reduce<NutritionSummary>(
+    (summary, meal) => ({
+      totalCalories: summary.totalCalories + meal.calories,
+      totalProtein: summary.totalProtein + meal.proteinGrams,
+      totalCarbs: summary.totalCarbs + meal.carbsGrams,
+      totalFats: summary.totalFats + meal.fatsGrams,
+    }),
+    {
+      totalCalories: 0,
+      totalProtein: 0,
+      totalCarbs: 0,
+      totalFats: 0,
+    },
+  );
+};
+
 export const samplePatientNutritionPlan: PatientNutritionPlan = {
   patientId: "1",
   patientName: "Ana Silva Santos",

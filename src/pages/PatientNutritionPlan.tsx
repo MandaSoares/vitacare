@@ -6,17 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { mockPatients } from "@/lib/patients";
-import { samplePatientNutritionPlan } from "@/lib/patientPlanData";
+import { calculateNutritionSummary, samplePatientNutritionPlan } from "@/lib/patientPlanData";
+import { loadPatientPlanFromStorage } from "@/lib/patientPlanStorage";
 
 const PatientNutritionPlan = () => {
   const navigate = useNavigate();
   const { patientId } = useParams();
 
   const patient = mockPatients.find((entry) => entry.id === patientId);
+  const storedPlan = patientId ? loadPatientPlanFromStorage(patientId) : null;
   const plan =
-    patientId === samplePatientNutritionPlan.patientId
+    storedPlan ??
+    (patientId === samplePatientNutritionPlan.patientId
       ? samplePatientNutritionPlan
-      : null;
+      : null);
+
+  const summary = plan ? calculateNutritionSummary(plan) : null;
 
   if (!patient || !plan) {
     return (
@@ -39,11 +44,6 @@ const PatientNutritionPlan = () => {
       </main>
     );
   }
-
-  const totalCalories = plan.meals.reduce((sum, meal) => sum + meal.calories, 0);
-  const totalProtein = plan.meals.reduce((sum, meal) => sum + meal.proteinGrams, 0);
-  const totalCarbs = plan.meals.reduce((sum, meal) => sum + meal.carbsGrams, 0);
-  const totalFats = plan.meals.reduce((sum, meal) => sum + meal.fatsGrams, 0);
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
@@ -75,22 +75,22 @@ const PatientNutritionPlan = () => {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="rounded-2xl border p-3 text-center">
                   <Flame className="mx-auto h-5 w-5 text-orange-500" />
-                  <p className="mt-2 text-lg font-semibold">{totalCalories}</p>
+                  <p className="mt-2 text-lg font-semibold">{summary?.totalCalories ?? 0}</p>
                   <p className="text-xs text-muted-foreground">kcal no dia</p>
                 </div>
                 <div className="rounded-2xl border p-3 text-center">
                   <Beef className="mx-auto h-5 w-5 text-red-500" />
-                  <p className="mt-2 text-lg font-semibold">{totalProtein}g</p>
+                  <p className="mt-2 text-lg font-semibold">{summary?.totalProtein ?? 0}g</p>
                   <p className="text-xs text-muted-foreground">proteína</p>
                 </div>
                 <div className="rounded-2xl border p-3 text-center">
                   <Wheat className="mx-auto h-5 w-5 text-amber-500" />
-                  <p className="mt-2 text-lg font-semibold">{totalCarbs}g</p>
+                  <p className="mt-2 text-lg font-semibold">{summary?.totalCarbs ?? 0}g</p>
                   <p className="text-xs text-muted-foreground">carboidratos</p>
                 </div>
                 <div className="rounded-2xl border p-3 text-center">
                   <Leaf className="mx-auto h-5 w-5 text-green-600" />
-                  <p className="mt-2 text-lg font-semibold">{totalFats}g</p>
+                  <p className="mt-2 text-lg font-semibold">{summary?.totalFats ?? 0}g</p>
                   <p className="text-xs text-muted-foreground">gorduras</p>
                 </div>
               </div>

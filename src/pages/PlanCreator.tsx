@@ -26,6 +26,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { savePatientPlanToStorage } from "@/lib/patientPlanStorage";
 
 const createEmptyPlan = (patientId: string): NutritionPlan => ({
   id: `plan-${patientId}`,
@@ -242,6 +243,8 @@ const PlanCreator: React.FC = () => {
       toast.error("Selecione um paciente");
       return;
     }
+    if (!currentPlan) return;
+    savePatientPlanToStorage(currentPlan);
     toast.success("Plano salvo como rascunho");
   };
 
@@ -254,7 +257,9 @@ const PlanCreator: React.FC = () => {
       toast.error("Adicione pelo menos uma refeição");
       return;
     }
-    updateCurrentPlan((plan) => ({ ...plan, active: true }));
+    const activePlan = { ...currentPlan, active: true };
+    updateCurrentPlan(() => activePlan);
+    savePatientPlanToStorage(activePlan);
     toast.success("Plano ativado com sucesso");
     setTimeout(() => navigate("/patients"), 1000);
   };
