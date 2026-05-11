@@ -11,6 +11,9 @@ import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import NutritionistSearch from "./pages/NutritionistSearch.tsx";
 import PatientSearch from "./pages/PatientSearch.tsx";
+import PlanCreator from "./pages/PlanCreator.tsx";
+import PatientNutritionPlan from "./pages/PatientNutritionPlan.tsx";
+import NutritionistPlanView from "./pages/NutritionistPlanView.tsx";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +50,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nutritionist/plan/create"
+              element={
+                <ProtectedRoute>
+                  <PlanCreator />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nutritionist/plans"
+              element={
+                <ProtectedRoute>
+                  <NutritionistPlanView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/patients/:patientId/plan"
+              element={
+                <ProtectedRoute>
+                  <PatientNutritionPlan />
                 </ProtectedRoute>
               }
             />
