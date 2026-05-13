@@ -9,6 +9,27 @@ type StoredAccount = {
 
 const STORAGE_KEY = "vitacare.mock.accounts";
 
+const DEFAULT_ACCOUNTS: Record<string, StoredAccount> = {
+  "paciente@teste.com": {
+    email: "paciente@teste.com",
+    name: "João Paciente",
+    password: "senha123",
+    roles: ["patient"],
+  },
+  "nutricionista@teste.com": {
+    email: "nutricionista@teste.com",
+    name: "Dra. Maria Nutricionista",
+    password: "senha123",
+    roles: ["nutritionist"],
+  },
+  "dual@teste.com": {
+    email: "dual@teste.com",
+    name: "Ana Dual",
+    password: "senha123",
+    roles: ["patient", "nutritionist"],
+  },
+};
+
 const normalizeEmail = (email: string): string => email.trim().toLowerCase();
 
 const readAccounts = (): Record<string, StoredAccount> => {
@@ -34,6 +55,19 @@ const writeAccounts = (accounts: Record<string, StoredAccount>): void => {
   }
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+};
+
+export const ensureDefaultMockAccounts = (): void => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const currentAccounts = readAccounts();
+  const mergedAccounts = { ...DEFAULT_ACCOUNTS, ...currentAccounts };
+
+  if (JSON.stringify(mergedAccounts) !== JSON.stringify(currentAccounts)) {
+    writeAccounts(mergedAccounts);
+  }
 };
 
 export const findStoredAccountByEmail = (email: string): StoredAccount | null => {

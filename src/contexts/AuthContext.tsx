@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
   
-type AuthUser = { 
+export type AuthUser = { 
   id?: string; 
   name?: string; 
   email?: string; 
