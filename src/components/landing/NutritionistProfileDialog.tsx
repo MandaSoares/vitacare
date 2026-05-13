@@ -1,12 +1,13 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, Heart, Send, CalendarCheck, CheckCircle, Users, Baby, ExternalLink, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +21,7 @@ export type Nutritionist = {
   reviews: number;
   price: number;
   avatar: string;
+  avatarUrl?: string;
   tags: string[];
   attendance: string;
   formations?: string[];
@@ -31,17 +33,24 @@ type Props = {
   nutritionist: Nutritionist | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isFavorited?: boolean;
+  onFavoriteChange?: (nextFavorited: boolean) => void;
 };
-const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) => {
+const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorited = false, onFavoriteChange }: Props) => {
   const [activeTab, setActiveTab] = useState("experiencia");
   const [showPhone, setShowPhone] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteState, setFavoriteState] = useState(isFavorited);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setFavoriteState(isFavorited);
+  }, [isFavorited, nutritionist?.id, open]);
+
   if (!nutritionist) return null;
   const requireAuth = (callback: () => void) => {
     if (!user) {
@@ -96,12 +105,14 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
   };
   const handleFavorite = () => {
     requireAuth(() => {
-      setIsFavorited(!isFavorited);
+      const nextFavorited = !favoriteState;
+      setFavoriteState(nextFavorited);
+      onFavoriteChange?.(nextFavorited);
       toast({
-        title: isFavorited ? "Removido dos favoritos" : "Adicionado aos favoritos",
-        description: isFavorited
-          ? `${nutritionist.name} foi removido(a) dos seus favoritos.`
-          : `${nutritionist.name} foi salvo(a) nos seus favoritos.`,
+        title: nextFavorited ? "Adicionado aos favoritos" : "Removido dos favoritos",
+        description: nextFavorited
+          ? `${nutritionist.name} foi salvo(a) nos seus favoritos.`
+          : `${nutritionist.name} foi removido(a) dos seus favoritos.`,
       });
     });
   };
@@ -125,10 +136,14 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
           <DialogHeader>
             <div className="flex items-start gap-3 sm:gap-4">
               <div className="relative shrink-0">
-                <div className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-secondary border-4 border-background flex items-center justify-center">
-                  <span className="text-lg sm:text-xl font-bold text-primary font-mono">
-                    {nutritionist.avatar}
-                  </span>
+                <div className="h-14 w-14 overflow-hidden rounded-full border-4 border-background bg-secondary sm:h-20 sm:w-20">
+                  {nutritionist.avatarUrl ? (
+                    <img src={nutritionist.avatarUrl} alt={nutritionist.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center font-mono text-lg font-bold text-primary sm:text-xl">
+                      {nutritionist.avatar}
+                    </div>
+                  )}
                 </div>
                 <div className="absolute -bottom-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-primary flex items-center justify-center">
                   <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
@@ -141,9 +156,10 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
                     onClick={handleFavorite}
                     className="text-muted-foreground hover:text-foreground transition-colors p-1 mt-0.5 shrink-0"
                   >
-                    <Heart className={`h-5 w-5 ${isFavorited ? "fill-destructive text-destructive" : ""}`} />
+                    <Heart className={`h-5 w-5 ${favoriteState ? "fill-destructive text-destructive" : ""}`} />
                   </button>
                 </div>
+                <DialogDescription className="sr-only">Perfil completo do nutricionista com informações, avaliações e ações rápidas.</DialogDescription>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
                   Nutricionista · {nutritionist.tags[0]}
                 </p>

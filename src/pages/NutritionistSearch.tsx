@@ -4,18 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Search, MapPin, Star, Award } from "lucide-react";
+import { Search, MapPin, Star, Award, Heart } from "lucide-react";
 import { toast } from "sonner";
 import NutritionistProfileDialog from "@/components/landing/NutritionistProfileDialog";
+import { getSavedNutritionistIds, setNutritionistSaved } from "@/lib/savedNutritionistsStore";
 import type { Nutritionist as LandingNutritionist } from "@/components/landing/NutritionistProfileDialog";
 
-interface Nutritionist extends LandingNutritionist {
+export interface Nutritionist extends LandingNutritionist {
   id: string;
   yearsExperience: number;
+  avatarUrl?: string;
 }
 
+export const getNutritionistAvatarStyle = (seed: string) => {
+  const palettes = [
+    "bg-emerald-100 text-emerald-800",
+    "bg-sky-100 text-sky-800",
+    "bg-rose-100 text-rose-800",
+    "bg-amber-100 text-amber-800",
+    "bg-violet-100 text-violet-800",
+  ];
+
+  const index = Math.abs(seed.split("").reduce((accumulator, character) => accumulator + character.charCodeAt(0), 0)) % palettes.length;
+  return palettes[index];
+};
+
 // Mock data - será substituído por API
-const mockNutritionists: Nutritionist[] = [
+export const mockNutritionists: Nutritionist[] = [
   {
     id: "1",
     name: "Dra. Carolina Silva",
@@ -30,6 +45,7 @@ const mockNutritionists: Nutritionist[] = [
     location: "São Paulo, SP",
     phone: "(11) 98765-4321",
     avatar: "CS",
+    avatarUrl: undefined,
     attendance: "Presencial e Online",
     price: 200,
     yearsExperience: 8,
@@ -48,6 +64,7 @@ const mockNutritionists: Nutritionist[] = [
     location: "Rio de Janeiro, RJ",
     phone: "(21) 99876-5432",
     avatar: "RC",
+    avatarUrl: undefined,
     attendance: "Presencial e Online",
     price: 180,
     yearsExperience: 12,
@@ -65,6 +82,7 @@ const mockNutritionists: Nutritionist[] = [
     location: "Belo Horizonte, MG",
     phone: "(31) 98765-6543",
     avatar: "AM",
+    avatarUrl: undefined,
     attendance: "Presencial e Online",
     price: 170,
     yearsExperience: 6,
@@ -83,6 +101,7 @@ const mockNutritionists: Nutritionist[] = [
     location: "Curitiba, PR",
     phone: "(41) 98765-7654",
     avatar: "LF",
+    avatarUrl: undefined,
     attendance: "Presencial e Online",
     price: 190,
     yearsExperience: 7,
@@ -98,6 +117,7 @@ const mockNutritionists: Nutritionist[] = [
     location: "Salvador, BA",
     phone: "(71) 98765-8765",
     avatar: "MO",
+    avatarUrl: undefined,
     attendance: "Consultório",
     price: 220,
     yearsExperience: 10,
@@ -114,15 +134,31 @@ const SPECIALTIES_FILTER = [
   "Doenças crônicas",
 ];
 
-const NutritionistCard = ({ nutritionist, onViewProfile }: { nutritionist: Nutritionist; onViewProfile: (nutritionist: Nutritionist) => void }) => {
+export const NutritionistCard = ({ nutritionist, onViewProfile, isFavorited, onFavoriteChange }: { nutritionist: Nutritionist; onViewProfile: (nutritionist: Nutritionist) => void; isFavorited?: boolean; onFavoriteChange?: (nutritionistId: string, isFavorited: boolean) => void }) => {
   return (
     <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onViewProfile(nutritionist)}>
       <CardHeader>
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg">{nutritionist.name}</CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">{nutritionist.crn}</p>
+          <div className="flex-1 flex items-center gap-3">
+            <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full font-semibold ${getNutritionistAvatarStyle(nutritionist.name)}`}>
+              {nutritionist.name.split(" ").map((part) => part[0]).slice(0, 2).join("")}
+            </div>
+            <div>
+              <CardTitle className="text-lg">{nutritionist.name}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">{nutritionist.crn}</p>
+            </div>
           </div>
+          {onFavoriteChange && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onFavoriteChange(nutritionist.id, !isFavorited);
+              }}
+              className="ml-2 rounded-full p-1 hover:bg-gray-100"
+            >
+              <Heart className={`h-5 w-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
+            </button>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -199,6 +235,7 @@ const NutritionistCard = ({ nutritionist, onViewProfile }: { nutritionist: Nutri
 };
 
 export const NutritionistSearch = () => {
+  const [savedIds, setSavedIds] = useState<string[]>(() => getSavedNutritionistIds());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAttendances, setSelectedAttendances] = useState<string[]>([]);
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
@@ -262,6 +299,13 @@ export const NutritionistSearch = () => {
     setSelectedNutritionist(nutritionist);
     setDialogOpen(true);
   };
+
+    const handleFavoriteChange = (nutritionistId: string, nextFavorite: boolean) => {
+      setSavedIds((current) => {
+        const nextIds = setNutritionistSaved(nutritionistId, nextFavorite);
+        return nextIds;
+      });
+    };
 
   return (
     <TooltipProvider>
@@ -396,6 +440,8 @@ export const NutritionistSearch = () => {
                         key={nutritionist.id}
                         nutritionist={nutritionist}
                         onViewProfile={handleViewProfile}
+                         isFavorited={savedIds.includes(nutritionist.id)}
+                         onFavoriteChange={handleFavoriteChange}
                       />
                     ))}
                   </div>
@@ -440,6 +486,11 @@ export const NutritionistSearch = () => {
             nutritionist={selectedNutritionist}
             open={dialogOpen}
             onOpenChange={setDialogOpen}
+             isFavorited={selectedNutritionist ? savedIds.includes(selectedNutritionist.id) : false}
+             onFavoriteChange={(nextFavorite) => {
+               if (!selectedNutritionist) return;
+               handleFavoriteChange(selectedNutritionist.id, nextFavorite);
+             }}
           />
         </div>
       </main>
