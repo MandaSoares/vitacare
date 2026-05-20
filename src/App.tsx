@@ -13,11 +13,17 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import NutritionistSearch from "./pages/NutritionistSearch.tsx";
 import PatientProfile from "./pages/PatientProfile.tsx";
 import PatientSearch from "./pages/PatientSearch.tsx";
+import PatientAccountProfile from "./pages/PatientAccountProfile.tsx";
+import NutritionistMessages from "./pages/NutritionistMessages.tsx";
+import Activities from "./pages/Activities.tsx";
+import Agenda from "./pages/Agenda.tsx";
+import Reports from "./pages/Reports.tsx";
 
 import PlanCreator from "./pages/PlanCreator.tsx";
 import PatientNutritionPlan from "./pages/PatientNutritionPlan.tsx";
 import NutritionistPlanView from "./pages/NutritionistPlanView.tsx";
 import PatientDashboard from "./pages/PatientDashboard.tsx";
+import NutritionistAccountProfile from "./pages/NutritionistAccountProfile.tsx";
 
 
 const queryClient = new QueryClient();
@@ -76,10 +82,34 @@ const App = () => (
               }
             />
             <Route
+              path="/patient/profile"
+              element={
+                <ProtectedRoute>
+                  <PatientAccountProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nutritionist/profile"
+              element={
+                <ProtectedRoute>
+                  <NutritionistAccountProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/nutritionist/messages"
+              element={
+                <ProtectedRoute>
+                  <NutritionistMessages />
                 </ProtectedRoute>
               }
             />
@@ -96,6 +126,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <NutritionistPlanView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/activities"
+              element={
+                <ProtectedRoute>
+                  <Activities />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agenda"
+              element={
+                <ProtectedRoute>
+                  <Agenda />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               }
             />

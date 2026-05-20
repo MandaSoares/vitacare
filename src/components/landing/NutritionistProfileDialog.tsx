@@ -28,6 +28,14 @@ export type Nutritionist = {
   plans?: string[];
   availability?: { day: string; hours: string }[];
   phone?: string;
+  bannerImageUrl?: string;
+  bio?: string;
+  specialties?: string[];
+  patientTypes?: string[];
+  serviceFirst?: string;
+  serviceReturn?: string;
+  servicePlan?: string;
+  serviceBioimpedance?: string;
 };
 type Props = {
   nutritionist: Nutritionist | null;
@@ -61,10 +69,10 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorit
     }
   };
   const services = [
-    { name: "Primeira consulta Nutrição", price: nutritionist.price },
-    { name: "Retorno nutricional", price: Math.round(nutritionist.price * 0.6) },
-    { name: "Plano alimentar personalizado", price: Math.round(nutritionist.price * 1.2) },
-    { name: "Bioimpedância", price: null },
+    { name: "Primeira consulta Nutrição", price: nutritionist.serviceFirst ?? nutritionist.price.toString() },
+    { name: "Retorno nutricional", price: nutritionist.serviceReturn ?? Math.round(nutritionist.price * 0.6).toString() },
+    { name: "Plano alimentar personalizado", price: nutritionist.servicePlan ?? Math.round(nutritionist.price * 1.2).toString() },
+    { name: "Bioimpedância", price: nutritionist.serviceBioimpedance ?? null },
   ];
   const formations = nutritionist.formations || [
     "Graduação em Nutrição – Universidade Federal",
@@ -129,7 +137,12 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorit
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); setShowPhone(false); setShowReviewForm(false); }}>
       <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-2xl p-0 gap-0 [&]:scrollbar-thin [&]:scrollbar-thumb-border [&]:scrollbar-track-transparent [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&>button.absolute]:text-white [&>button.absolute]:bg-transparent [&>button.absolute]:rounded-none [&>button.absolute]:shadow-none [&>button.absolute]:hover:bg-transparent [&>button.absolute]:hover:text-white/80 [&>button.absolute]:hover:opacity-80 [&>button.absolute]:z-50 [&>button.absolute]:top-3 [&>button.absolute]:right-3 sm:rounded-2xl rounded-2xl">
-        <div className="h-24 sm:h-28 bg-gradient-to-r from-primary/80 to-primary rounded-t-2xl relative overflow-hidden">
+        <div className="h-24 sm:h-28 rounded-t-2xl relative overflow-hidden">
+          {nutritionist.bannerImageUrl ? (
+            <img src={nutritionist.bannerImageUrl} alt="Banner do profissional" className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-r from-primary/80 to-primary" />
+          )}
           <p className="absolute bottom-2 right-3 text-[10px] text-primary-foreground/50">Banner do profissional</p>
         </div>
         <div className="px-5 sm:px-6 pb-4 -mt-8 sm:-mt-10 relative">
@@ -256,9 +269,7 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorit
               </ul>
             </div>
             <p className="text-sm text-foreground leading-relaxed">
-              Formada em Nutrição com especialização em {nutritionist.tags.join(", ")}.
-              Atuo com foco na reeducação alimentar personalizada, buscando promover saúde e
-              qualidade de vida através de uma abordagem humanizada e baseada em evidências científicas.
+              {nutritionist.bio || `Formada em Nutrição com especialização em ${nutritionist.tags.join(", ")}.`}
             </p>
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Experiência em:</p>
@@ -266,14 +277,12 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorit
                 {nutritionist.tags.map((tag) => (
                   <li key={tag} className="text-sm text-foreground">{tag}</li>
                 ))}
-                <li className="text-sm text-foreground">Reeducação alimentar</li>
-                <li className="text-sm text-foreground">Nutrição funcional</li>
               </ul>
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Principais áreas de atuação</p>
               <div className="flex flex-wrap gap-2">
-                {[...nutritionist.tags, "Reeducação Alimentar", "Nutrição Funcional"].map((tag) => (
+                {nutritionist.tags.map((tag) => (
                   <span
                     key={tag}
                     className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
@@ -286,12 +295,12 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorit
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Pacientes que atendo</p>
               <div className="space-y-1.5">
-                <p className="text-sm text-foreground flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" /> Adultos
-                </p>
-                <p className="text-sm text-foreground flex items-center gap-2">
-                  <Baby className="h-4 w-4 text-muted-foreground" /> Crianças
-                </p>
+                {(nutritionist.patientTypes || ["Adultos", "Crianças"]).map((type) => (
+                  <p key={type} className="text-sm text-foreground flex items-center gap-2">
+                    {type === "Crianças" ? <Baby className="h-4 w-4 text-muted-foreground" /> : <Users className="h-4 w-4 text-muted-foreground" />}
+                    {type}
+                  </p>
+                ))}
               </div>
             </div>
             <div>

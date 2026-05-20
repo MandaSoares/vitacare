@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Search, MapPin, Star, Award, Heart } from "lucide-react";
 import { toast } from "sonner";
 import NutritionistProfileDialog from "@/components/landing/NutritionistProfileDialog";
+import { NutritionistSidebar } from "@/components/layout/NutritionistSidebar";
 import { getSavedNutritionistIds, setNutritionistSaved } from "@/lib/savedNutritionistsStore";
 import type { Nutritionist as LandingNutritionist } from "@/components/landing/NutritionistProfileDialog";
 
@@ -234,7 +235,7 @@ export const NutritionistCard = ({ nutritionist, onViewProfile, isFavorited, onF
   );
 };
 
-export const NutritionistSearch = () => {
+export const NutritionistSearch = ({ showSidebar = true, embedded = false }: { showSidebar?: boolean; embedded?: boolean } = {}) => {
   const [savedIds, setSavedIds] = useState<string[]>(() => getSavedNutritionistIds());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAttendances, setSelectedAttendances] = useState<string[]>([]);
@@ -300,6 +301,23 @@ export const NutritionistSearch = () => {
     setDialogOpen(true);
   };
 
+  useEffect(() => {
+    if (embedded) {
+      return;
+    }
+
+    const previousBodyBackground = document.body.style.backgroundColor;
+    const previousHtmlBackground = document.documentElement.style.backgroundColor;
+
+    document.body.style.backgroundColor = "#ffffff";
+    document.documentElement.style.backgroundColor = "#ffffff";
+
+    return () => {
+      document.body.style.backgroundColor = previousBodyBackground;
+      document.documentElement.style.backgroundColor = previousHtmlBackground;
+    };
+  }, [embedded]);
+
     const handleFavoriteChange = (nutritionistId: string, nextFavorite: boolean) => {
       setSavedIds((current) => {
         const nextIds = setNutritionistSaved(nutritionistId, nextFavorite);
@@ -309,8 +327,11 @@ export const NutritionistSearch = () => {
 
   return (
     <TooltipProvider>
-      <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-7xl space-y-8">
+      <div className={embedded ? "w-full min-w-0 px-4 lg:px-6 xl:px-8 text-slate-900" : "min-h-screen bg-white text-slate-900"}>
+        <div className={showSidebar ? "grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]" : (embedded ? "w-full" : "min-h-screen") }>
+          {showSidebar && <NutritionistSidebar />}
+          <main className={embedded ? "w-full min-w-0 px-0 py-0 text-foreground" : "min-h-screen bg-white px-4 py-8 text-foreground sm:px-6 lg:px-8"}>
+            <div className={embedded ? "w-full min-w-0 space-y-6 pl-4 lg:pl-8 xl:pl-10" : "mx-auto w-full max-w-7xl space-y-8"}>
           {/* Header */}
           <div className="space-y-4">
             <div>
@@ -365,10 +386,10 @@ export const NutritionistSearch = () => {
               )}
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
+          <div className={embedded ? "space-y-6" : "grid gap-8 lg:grid-cols-4"}>
             {/* Sidebar Filters */}
-            <div className="lg:col-span-1">
-              <Card className="sticky top-4">
+            <div className={embedded ? "w-full" : "lg:col-span-1"}>
+              <Card className={embedded ? "w-full" : "sticky top-4"}>
                 <CardHeader>
                   <CardTitle className="text-base">Filtros</CardTitle>
                 </CardHeader>
@@ -428,13 +449,13 @@ export const NutritionistSearch = () => {
             </div>
 
             {/* Results Grid */}
-            <div className="lg:col-span-3">
+            <div className={embedded ? "w-full" : "lg:col-span-3"}>
               {filteredNutritionists.length > 0 ? (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     {filteredNutritionists.length} nutricionista{filteredNutritionists.length !== 1 ? "s" : ""} encontrado{filteredNutritionists.length !== 1 ? "s" : ""}
                   </p>
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className={embedded ? "grid gap-4" : "grid gap-4 md:grid-cols-2"}>
                     {filteredNutritionists.map((nutritionist) => (
                       <NutritionistCard
                         key={nutritionist.id}
@@ -492,8 +513,10 @@ export const NutritionistSearch = () => {
                handleFavoriteChange(selectedNutritionist.id, nextFavorite);
              }}
           />
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
     </TooltipProvider>
   );
 };

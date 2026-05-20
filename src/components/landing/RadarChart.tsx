@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 
 const metrics = [
@@ -9,7 +10,11 @@ const metrics = [
   { label: "Calorias", current: 0.78, target: 1.0 },
 ];
 
-const RadarChart = () => {
+interface RadarChartProps {
+  isHovered?: boolean;
+}
+
+const RadarChart: React.FC<RadarChartProps> = ({ isHovered = false }) => {
   const cx = 140;
   const cy = 140;
   const maxR = 100;
@@ -39,7 +44,7 @@ const RadarChart = () => {
 
   return (
     <div className="relative">
-      <svg viewBox="0 0 280 280" className="w-full h-full">
+      <svg viewBox="0 0 280 280" preserveAspectRatio="xMidYMid meet" className="w-full h-full" style={{ pointerEvents: 'none' }}>
         {/* Grid lines */}
         {[0.25, 0.5, 0.75, 1.0].map((level) => (
           <polygon
@@ -89,11 +94,14 @@ const RadarChart = () => {
           d={currentPath}
           fill="hsl(var(--primary) / 0.15)"
           stroke="hsl(var(--primary))"
-          strokeWidth="1.5"
           initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
+          animate={{
+            opacity: 1,
+            scale: isHovered ? 1.08 : 1,
+            strokeWidth: isHovered ? 2.5 : 1.5,
+          }}
           transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{ transformOrigin: `${cx}px ${cy}px` }}
+          style={{ transformOrigin: '50% 50%', transformBox: 'fill-box' }}
         />
 
         {/* Data points */}
@@ -107,8 +115,14 @@ const RadarChart = () => {
               r="3"
               fill="hsl(var(--primary))"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.7 + i * 0.1 }}
+              animate={{
+                opacity: 1,
+                r: isHovered ? 4.5 : 3,
+              }}
+              transition={{
+                delay: 0.7 + i * 0.1,
+                r: { duration: 0.3 },
+              }}
             />
           );
         })}
