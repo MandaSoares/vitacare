@@ -1,32 +1,61 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays, Clock3, Flame, Leaf, Beef, Wheat } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { NutritionistSidebar } from "@/components/layout/NutritionistSidebar";
 import { mockPatients } from "@/lib/patients";
-import { calculateNutritionSummary, samplePatientNutritionPlan } from "@/lib/patientPlanData";
-import { loadPatientPlanFromStorage } from "@/lib/patientPlanStorage";
+import { calculateNutritionSummary, samplePatientNutritionPlan, PatientNutritionPlan as PlanType } from "@/lib/patientPlanData";
+import { loadPatientPlanFromStorage, savePatientPlanToStorage } from "@/lib/patientPlanStorage";
 
 const PatientNutritionPlan = () => {
   const navigate = useNavigate();
   const { patientId } = useParams();
 
   const patient = mockPatients.find((entry) => entry.id === patientId);
-  const storedPlan = patientId ? loadPatientPlanFromStorage(patientId) : null;
-  const plan =
-    storedPlan ??
-    (patientId === samplePatientNutritionPlan.patientId
-      ? samplePatientNutritionPlan
-      : null);
+
+  const [plan, setPlan] = useState<PlanType | null>(() => {
+    if (!patientId) return null;
+    try {
+      return loadPatientPlanFromStorage(patientId);
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    if (!patient || !patientId) return;
+
+    // If no plan found, create a mock plan for this patient and save it
+    if (!plan) {
+      const newPlan: PlanType = {
+        ...samplePatientNutritionPlan,
+        patientId,
+        patientName: patient.name,
+        updatedAt: new Date().toISOString(),
+      };
+      try {
+        savePatientPlanToStorage(newPlan);
+        setPlan(newPlan);
+      } catch {
+        // ignore failures in non-browser env
+        setPlan(newPlan);
+      }
+    }
+  }, [patientId, patient, plan]);
 
   const summary = plan ? calculateNutritionSummary(plan) : null;
 
   if (!patient || !plan) {
     return (
-      <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-3xl">
+      <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+        <div className="grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]">
+          <NutritionistSidebar />
+          <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
+            <div className="w-full space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Plano nutricional não encontrado</CardTitle>
@@ -40,14 +69,19 @@ const PatientNutritionPlan = () => {
               </Button>
             </CardContent>
           </Card>
+            </div>
+          </main>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-6xl space-y-6">
+    <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+      <div className="grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]">
+        <NutritionistSidebar />
+        <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
+          <div className="w-full space-y-6">
         <div className="flex items-center justify-between gap-4">
           <Link
             to={`/patients/${patientId}`}
@@ -193,10 +227,12 @@ const PatientNutritionPlan = () => {
           <Button onClick={() => navigate(`/patients/${patientId}`)} variant="outline">
             Voltar para o perfil
           </Button>
-          <Button onClick={() => navigate("/patient/dashboard")}>Abrir dashboard</Button>
+          <Button disabled>Abrir dashboard</Button>
         </div>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 };
 

@@ -1,12 +1,13 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, Heart, Send, CalendarCheck, CheckCircle, Users, Baby, ExternalLink, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,28 +21,44 @@ export type Nutritionist = {
   reviews: number;
   price: number;
   avatar: string;
+  avatarUrl?: string;
   tags: string[];
   attendance: string;
   formations?: string[];
   plans?: string[];
   availability?: { day: string; hours: string }[];
   phone?: string;
+  bannerImageUrl?: string;
+  bio?: string;
+  specialties?: string[];
+  patientTypes?: string[];
+  serviceFirst?: string;
+  serviceReturn?: string;
+  servicePlan?: string;
+  serviceBioimpedance?: string;
 };
 type Props = {
   nutritionist: Nutritionist | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isFavorited?: boolean;
+  onFavoriteChange?: (nextFavorited: boolean) => void;
 };
-const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) => {
+const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange, isFavorited = false, onFavoriteChange }: Props) => {
   const [activeTab, setActiveTab] = useState("experiencia");
   const [showPhone, setShowPhone] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteState, setFavoriteState] = useState(isFavorited);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setFavoriteState(isFavorited);
+  }, [isFavorited, nutritionist?.id, open]);
+
   if (!nutritionist) return null;
   const requireAuth = (callback: () => void) => {
     if (!user) {
@@ -52,10 +69,10 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
     }
   };
   const services = [
-    { name: "Primeira consulta Nutrição", price: nutritionist.price },
-    { name: "Retorno nutricional", price: Math.round(nutritionist.price * 0.6) },
-    { name: "Plano alimentar personalizado", price: Math.round(nutritionist.price * 1.2) },
-    { name: "Bioimpedância", price: null },
+    { name: "Primeira consulta Nutrição", price: nutritionist.serviceFirst ?? nutritionist.price.toString() },
+    { name: "Retorno nutricional", price: nutritionist.serviceReturn ?? Math.round(nutritionist.price * 0.6).toString() },
+    { name: "Plano alimentar personalizado", price: nutritionist.servicePlan ?? Math.round(nutritionist.price * 1.2).toString() },
+    { name: "Bioimpedância", price: nutritionist.serviceBioimpedance ?? null },
   ];
   const formations = nutritionist.formations || [
     "Graduação em Nutrição – Universidade Federal",
@@ -96,12 +113,14 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
   };
   const handleFavorite = () => {
     requireAuth(() => {
-      setIsFavorited(!isFavorited);
+      const nextFavorited = !favoriteState;
+      setFavoriteState(nextFavorited);
+      onFavoriteChange?.(nextFavorited);
       toast({
-        title: isFavorited ? "Removido dos favoritos" : "Adicionado aos favoritos",
-        description: isFavorited
-          ? `${nutritionist.name} foi removido(a) dos seus favoritos.`
-          : `${nutritionist.name} foi salvo(a) nos seus favoritos.`,
+        title: nextFavorited ? "Adicionado aos favoritos" : "Removido dos favoritos",
+        description: nextFavorited
+          ? `${nutritionist.name} foi salvo(a) nos seus favoritos.`
+          : `${nutritionist.name} foi removido(a) dos seus favoritos.`,
       });
     });
   };
@@ -118,17 +137,26 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); setShowPhone(false); setShowReviewForm(false); }}>
       <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-2xl p-0 gap-0 [&]:scrollbar-thin [&]:scrollbar-thumb-border [&]:scrollbar-track-transparent [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&>button.absolute]:text-white [&>button.absolute]:bg-transparent [&>button.absolute]:rounded-none [&>button.absolute]:shadow-none [&>button.absolute]:hover:bg-transparent [&>button.absolute]:hover:text-white/80 [&>button.absolute]:hover:opacity-80 [&>button.absolute]:z-50 [&>button.absolute]:top-3 [&>button.absolute]:right-3 sm:rounded-2xl rounded-2xl">
-        <div className="h-24 sm:h-28 bg-gradient-to-r from-primary/80 to-primary rounded-t-2xl relative overflow-hidden">
+        <div className="h-24 sm:h-28 rounded-t-2xl relative overflow-hidden">
+          {nutritionist.bannerImageUrl ? (
+            <img src={nutritionist.bannerImageUrl} alt="Banner do profissional" className="h-full w-full object-cover" />
+          ) : (
+            <div className="h-full w-full bg-gradient-to-r from-primary/80 to-primary" />
+          )}
           <p className="absolute bottom-2 right-3 text-[10px] text-primary-foreground/50">Banner do profissional</p>
         </div>
         <div className="px-5 sm:px-6 pb-4 -mt-8 sm:-mt-10 relative">
           <DialogHeader>
             <div className="flex items-start gap-3 sm:gap-4">
               <div className="relative shrink-0">
-                <div className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-secondary border-4 border-background flex items-center justify-center">
-                  <span className="text-lg sm:text-xl font-bold text-primary font-mono">
-                    {nutritionist.avatar}
-                  </span>
+                <div className="h-14 w-14 overflow-hidden rounded-full border-4 border-background bg-secondary sm:h-20 sm:w-20">
+                  {nutritionist.avatarUrl ? (
+                    <img src={nutritionist.avatarUrl} alt={nutritionist.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center font-mono text-lg font-bold text-primary sm:text-xl">
+                      {nutritionist.avatar}
+                    </div>
+                  )}
                 </div>
                 <div className="absolute -bottom-1 -right-1 h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-primary flex items-center justify-center">
                   <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
@@ -141,9 +169,10 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
                     onClick={handleFavorite}
                     className="text-muted-foreground hover:text-foreground transition-colors p-1 mt-0.5 shrink-0"
                   >
-                    <Heart className={`h-5 w-5 ${isFavorited ? "fill-destructive text-destructive" : ""}`} />
+                    <Heart className={`h-5 w-5 ${favoriteState ? "fill-destructive text-destructive" : ""}`} />
                   </button>
                 </div>
+                <DialogDescription className="sr-only">Perfil completo do nutricionista com informações, avaliações e ações rápidas.</DialogDescription>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
                   Nutricionista · {nutritionist.tags[0]}
                 </p>
@@ -240,9 +269,7 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
               </ul>
             </div>
             <p className="text-sm text-foreground leading-relaxed">
-              Formada em Nutrição com especialização em {nutritionist.tags.join(", ")}.
-              Atuo com foco na reeducação alimentar personalizada, buscando promover saúde e
-              qualidade de vida através de uma abordagem humanizada e baseada em evidências científicas.
+              {nutritionist.bio || `Formada em Nutrição com especialização em ${nutritionist.tags.join(", ")}.`}
             </p>
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Experiência em:</p>
@@ -250,14 +277,12 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
                 {nutritionist.tags.map((tag) => (
                   <li key={tag} className="text-sm text-foreground">{tag}</li>
                 ))}
-                <li className="text-sm text-foreground">Reeducação alimentar</li>
-                <li className="text-sm text-foreground">Nutrição funcional</li>
               </ul>
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Principais áreas de atuação</p>
               <div className="flex flex-wrap gap-2">
-                {[...nutritionist.tags, "Reeducação Alimentar", "Nutrição Funcional"].map((tag) => (
+                {nutritionist.tags.map((tag) => (
                   <span
                     key={tag}
                     className="text-xs px-3 py-1.5 rounded-full bg-primary text-primary-foreground font-medium"
@@ -270,12 +295,12 @@ const NutritionistProfileDialog = ({ nutritionist, open, onOpenChange }: Props) 
             <div>
               <p className="text-sm font-semibold text-foreground mb-2">Pacientes que atendo</p>
               <div className="space-y-1.5">
-                <p className="text-sm text-foreground flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" /> Adultos
-                </p>
-                <p className="text-sm text-foreground flex items-center gap-2">
-                  <Baby className="h-4 w-4 text-muted-foreground" /> Crianças
-                </p>
+                {(nutritionist.patientTypes || ["Adultos", "Crianças"]).map((type) => (
+                  <p key={type} className="text-sm text-foreground flex items-center gap-2">
+                    {type === "Crianças" ? <Baby className="h-4 w-4 text-muted-foreground" /> : <Users className="h-4 w-4 text-muted-foreground" />}
+                    {type}
+                  </p>
+                ))}
               </div>
             </div>
             <div>

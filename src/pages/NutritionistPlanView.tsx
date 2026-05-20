@@ -1,11 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { savePatientPlanToStorage, loadPatientPlanFromStorage } from "@/lib/patientPlanStorage";
+import { samplePatientNutritionPlan } from "@/lib/patientPlanData";
 import { ArrowLeft, CalendarDays, ChevronDown, Search, Users, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { NutritionistSidebar } from "@/components/layout/NutritionistSidebar";
 
 const patients = [
   {
@@ -47,8 +50,9 @@ const patients = [
 ] as const;
 
 const NutritionistPlanView: React.FC = () => {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>("1");
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
 
   const filteredPatients = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -73,8 +77,11 @@ const NutritionistPlanView: React.FC = () => {
   const selectedPatient = filteredPatients.find((patient) => patient.id === selectedPatientId) ?? null;
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.08),_transparent_35%),linear-gradient(180deg,_rgba(250,250,250,1)_0%,_rgba(244,247,250,1)_100%)] px-4 py-6 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-7xl space-y-6">
+    <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+      <div className="grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]">
+        <NutritionistSidebar />
+        <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.08),_transparent_35%),linear-gradient(180deg,_rgba(250,250,250,1)_0%,_rgba(244,247,250,1)_100%)] px-4 py-6 text-foreground sm:px-6 lg:px-8 lg:pl-12">
+          <div className="w-full space-y-6">
         <header className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
           <div className="flex flex-col gap-5 p-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-3">
@@ -190,12 +197,48 @@ const NutritionistPlanView: React.FC = () => {
                           </div>
 
                           <div className="grid gap-3 sm:grid-cols-2">
-                            <Button asChild className="justify-start">
-                              <Link to={`/patients/${patient.id}/plan`}>Abrir plano detalhado</Link>
-                            </Button>
-                            <Button variant="outline" asChild className="justify-start">
-                              <Link to="/nutritionist/plan/create">Editar criação de plano</Link>
-                            </Button>
+                            {patient.planStatus === "active" ? (
+                              <>
+                                <Button
+                                  className="justify-start"
+                                  onClick={() => {
+                                    let plan = loadPatientPlanFromStorage(patient.id);
+                                    if (!plan) {
+                                      const newPlan = {
+                                        ...samplePatientNutritionPlan,
+                                        patientId: patient.id,
+                                        patientName: patient.name,
+                                        updatedAt: new Date().toISOString(),
+                                      };
+                                      try {
+                                        savePatientPlanToStorage(newPlan);
+                                        plan = newPlan;
+                                      } catch {
+                                        // ignore
+                                      }
+                                    }
+                                    if (plan) {
+                                      navigate(`/patients/${patient.id}/plan`);
+                                    } else {
+                                      navigate(`/nutritionist/plan/create?patientId=${patient.id}`);
+                                    }
+                                  }}
+                                >
+                                  Abrir plano detalhado
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => navigate(`/nutritionist/plan/create?patientId=${patient.id}`)}
+                                  className="justify-start"
+                                >
+                                  Editar criação de plano
+                                </Button>
+                              </>
+                            ) : (
+                              <Button onClick={() => navigate(`/nutritionist/plan/create?patientId=${patient.id}`)} className="justify-start">
+                                Criar plano
+                              </Button>
+                            )}
                           </div>
                         </CardContent>
                       </CollapsibleContent>
@@ -212,8 +255,10 @@ const NutritionistPlanView: React.FC = () => {
             </div>
           </section>
         </div>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 };
 

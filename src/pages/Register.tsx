@@ -17,6 +17,8 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { upsertStoredAccount } from "@/lib/authAccountStore";
+import { getDefaultNutritionistProfile, saveNutritionistProfile } from "@/lib/nutritionistProfileStore";
+import { getDefaultPatientProfile, savePatientProfile } from "@/lib/patientProfileStore";
 
 const steps = ["", "", "", ""];
 
@@ -526,7 +528,9 @@ const Register = () => {
   const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [availabilityOpenDay, setAvailabilityOpenDay] = useState<WeekDayField | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [profileImageData, setProfileImageData] = useState<string | null>(null);
   const [customBannerPreview, setCustomBannerPreview] = useState<string | null>(null);
+  const [customBannerData, setCustomBannerData] = useState<string | null>(null);
   const [profileImageScale, setProfileImageScale] = useState([1]);
   const [bannerScale, setBannerScale] = useState([1]);
   const [profileImageScaleDraft, setProfileImageScaleDraft] = useState([1]);
@@ -711,12 +715,8 @@ const Register = () => {
       if (profileImagePreview) {
         URL.revokeObjectURL(profileImagePreview);
       }
-
-      if (customBannerPreview) {
-        URL.revokeObjectURL(customBannerPreview);
-      }
     };
-  }, [customBannerPreview, profileImagePreview]);
+  }, [profileImagePreview]);
 
   const toggleTagSelection = (field: "expertise" | "acceptedPlans", value: string) => {
     const currentValues = getValues(field);
@@ -760,6 +760,54 @@ const Register = () => {
 
     try {
       const response = await simulateRegisterApi(values);
+      const normalizedEmail = values.email.trim().toLowerCase();
+
+      if (values.profileType === "patient") {
+        const patientProfile = {
+          ...getDefaultPatientProfile(),
+          name: values.fullName,
+          email: normalizedEmail,
+          profileImageUrl: profileImageData ?? profileImagePreview ?? "",
+        };
+
+        savePatientProfile(
+          {
+            id: normalizedEmail,
+            name: values.fullName,
+            email: normalizedEmail,
+            role: "patient",
+          },
+          patientProfile,
+        );
+      }
+
+      if (values.profileType === "nutritionist") {
+        saveNutritionistProfile(
+          {
+            id: normalizedEmail,
+            name: values.fullName,
+            email: normalizedEmail,
+            role: "nutritionist",
+          },
+          {
+            ...getDefaultNutritionistProfile(),
+            name: values.fullName,
+            email: normalizedEmail,
+            crn: values.crn ?? "",
+            phone: values.phone ?? "",
+            specialty: values.specialty ?? "",
+            state: values.state ?? "",
+            city: values.city ?? "",
+            attendance: values.attendance ?? "",
+            bio: values.bio ?? "",
+            formationPrimary: values.formationPrimary ?? "",
+            formationSecondary: values.formationSecondary ?? "",
+            profileImageUrl: profileImageData ?? profileImagePreview ?? "",
+            bannerPreset: values.bannerPreset === "custom" ? "custom" : (values.bannerPreset as "forest" | "sunrise" | "ocean") || "forest",
+            customBannerImageUrl: values.bannerPreset === "custom" ? (customBannerData ?? customBannerPreview ?? "") : "",
+          },
+        );
+      }
 
       if (response.status === 200 || response.status === 201) {
         toast.success(response.message);
@@ -839,6 +887,12 @@ const Register = () => {
     setProfileImageScaleDraft([1]);
     setIsProfileAdjusting(true);
     setValue("profileImageName", file.name, { shouldValidate: true });
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProfileImageData(String(reader.result ?? ""));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleCustomBannerChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -848,12 +902,14 @@ const Register = () => {
       return;
     }
 
-    if (customBannerPreview) {
-      URL.revokeObjectURL(customBannerPreview);
-    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const previewUrl = String(reader.result ?? "");
+      setCustomBannerPreview(previewUrl);
+      setCustomBannerData(previewUrl);
+    };
+    reader.readAsDataURL(file);
 
-    const previewUrl = URL.createObjectURL(file);
-    setCustomBannerPreview(previewUrl);
     setBannerScale([1]);
     setBannerScaleDraft([1]);
     setIsBannerAdjusting(true);
@@ -862,11 +918,9 @@ const Register = () => {
   };
 
   const handlePresetBannerSelect = (presetId: string) => {
-    if (customBannerPreview) {
-      URL.revokeObjectURL(customBannerPreview);
-      setCustomBannerPreview(null);
-      setValue("customBannerName", "", { shouldValidate: true });
-    }
+    setCustomBannerPreview(null);
+    setCustomBannerData(null);
+    setValue("customBannerName", "", { shouldValidate: true });
 
     setBannerScale([1]);
     setBannerScaleDraft([1]);
@@ -1604,6 +1658,7 @@ const Register = () => {
                       )}
                     </div>
                   ) : null}
+                  {renderFieldError("profileImageName")}
                 </section>
 
                 <section className="space-y-3">
@@ -1788,6 +1843,7 @@ const Register = () => {
                       )}
                     </div>
                   ) : null}
+                  {renderFieldError("profileImageName")}
                 </section>
               </div>
             )}

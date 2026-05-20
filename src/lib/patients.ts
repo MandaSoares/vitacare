@@ -49,7 +49,7 @@ export const mockPatients: Patient[] = [
     name: "Ana Costa",
     cpf: "789.123.456-33",
     email: "ana@email.com",
-    phone: "(11) 95432-1098",
+    phone: "(11) 93456-7890",
     planStatus: "pending",
     joinDate: "2026-05-01",
     lastConsultation: null,

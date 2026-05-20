@@ -23,7 +23,7 @@ import { findStoredAccountByEmail } from "@/lib/authAccountStore";
 
 const loginSchema = z.object({
   email: z.string().trim().min(1, "Informe seu email.").email("Informe um email válido."),
-  password: z.string().min(1, "Informe sua senha."),
+    password: z.string().min(1, "E-mail ou senha incorretos."),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -154,6 +154,7 @@ const Login = () => {
   const onSubmit = async () => {
     const email = getValues("email").trim().toLowerCase();
     const password = getValues("password");
+    const storedAccount = findStoredAccountByEmail(email);
 
     try {
       const response = await simulateLoginApi(email, password);
@@ -176,7 +177,7 @@ const Login = () => {
         token: `auth-token-${email}`,
         user: {
           id: email,
-          name: email.split("@")[0],
+          name: storedAccount?.name ?? email.split("@")[0],
           email,
           role,
         },
@@ -205,11 +206,13 @@ const Login = () => {
       description: `Usando a conta vinculada a ${pendingEmail}.`,
     });
 
+    const storedAccount = findStoredAccountByEmail(pendingEmail);
+
     signIn({
       token: `auth-token-${pendingEmail}`,
       user: {
         id: pendingEmail,
-        name: pendingEmail.split("@")[0],
+        name: storedAccount?.name ?? pendingEmail,
         email: pendingEmail,
         role,
       },

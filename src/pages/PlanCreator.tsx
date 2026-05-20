@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { Trash2, Plus, Edit, GripVertical } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
+import { NutritionistSidebar } from "@/components/layout/NutritionistSidebar";
 import {
   Select,
   SelectContent,
@@ -265,286 +266,286 @@ const PlanCreator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-slate-50">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <header>
-          <h1 className="text-3xl font-bold">Criar plano nutricional</h1>
-          <p className="text-slate-600">Preencha os dados e adicione as refeições</p>
-        </header>
+    <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+      <div className="grid min-h-screen gap-0 lg:grid-cols-[224px_minmax(0,1fr)]">
+        <NutritionistSidebar />
+        <main className="min-h-screen bg-slate-50 px-4 py-6 md:px-8 md:py-8 lg:pl-12">
+          <div className="w-full space-y-6">
+            <header>
+              <div>
+                <h1 className="text-3xl font-bold">Criar plano nutricional</h1>
+                <p className="text-slate-600">Preencha os dados e adicione as refeições</p>
+              </div>
+            </header>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Informações do plano</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700">Paciente *</label>
-              <Select value={selectedPatientId} onValueChange={handlePatientChange}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Selecione um paciente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockPatients.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name} ({p.cpf})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Card>
+              <CardHeader>
+                <CardTitle>Informações do plano</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Paciente *</label>
+                  <Select value={selectedPatientId} onValueChange={handlePatientChange}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Selecione um paciente" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockPatients.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.name} ({p.cpf})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {selectedPatient && (
+                  <div className="rounded-md border border-blue-200 bg-blue-50 p-3">
+                    <p className="text-sm text-blue-700">
+                      <strong>Paciente selecionado:</strong> {selectedPatient.name}
+                    </p>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Título do plano</label>
+                  <Input
+                    className="mt-1"
+                    placeholder="Ex: Plano de ganho de massa"
+                    value={currentPlan?.title ?? ""}
+                    onChange={(e) => {
+                      if (!selectedPatientId) return;
+                      updateCurrentPlan((plan) => ({ ...plan, title: e.target.value }));
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700">Observações (opcional)</label>
+                  <Textarea className="mt-1" placeholder="Ex: Aumentar ingestão de proteína..." />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Refeições</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">Nome da refeição</label>
+                    <Input
+                      className="mt-1"
+                      placeholder="Ex: Café da manhã"
+                      value={mealName}
+                      onChange={(e) => setMealName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">Horário</label>
+                    <Input
+                      className="mt-1"
+                      placeholder="08:00"
+                      type="time"
+                      value={mealTime}
+                      onChange={(e) => setMealTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button onClick={addMeal} className="w-full" size="lg">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Adicionar refeição
+                </Button>
+              </CardContent>
+            </Card>
+
+            {currentPlan?.meals.length > 0 && (
+              <div className="space-y-4">
+                {currentPlan?.meals.map((meal, mealIdx) => (
+                  <Card key={meal.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      {editingMealIdx === mealIdx ? (
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            placeholder="Nome da refeição"
+                            value={editMealName}
+                            onChange={(e) => setEditMealName(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Horário"
+                            type="time"
+                            value={editMealTime}
+                            onChange={(e) => setEditMealTime(e.target.value)}
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={() => saveEditMeal(mealIdx)}>
+                              Salvar
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={cancelEditMeal}>
+                              Cancelar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <h3 className="text-lg font-semibold">{meal.name}</h3>
+                          <p className="text-sm text-slate-500">{meal.time}</p>
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        {editingMealIdx !== mealIdx && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => startEditMeal(mealIdx)}
+                            title="Editar refeição"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {editingMealIdx !== mealIdx && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setMealToDeleteIdx(mealIdx)}
+                            title="Remover refeição"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <Separator />
+                  <CardContent className="pt-4">
+                    <div className="space-y-3">
+                      {meal.items.length > 0 && (
+                        <div className="space-y-2 rounded-lg bg-slate-50 p-3">
+                          {meal.items.map((item, foodIdx) => (
+                            <div
+                              key={item.id}
+                              className={cn(
+                                "flex items-center justify-between rounded-md px-2 py-2 text-sm transition-all duration-200",
+                                dragInfo && dragInfo.mealIdx === mealIdx && dragInfo.from === foodIdx
+                                  ? "scale-[1.01] bg-sky-100 opacity-75 ring-2 ring-sky-400 shadow-md"
+                                  : "",
+                                dragInfo && dragOverIdx && dragInfo.mealIdx === mealIdx
+                                  ? dragInfo.from < dragOverIdx.idx && foodIdx > dragInfo.from && foodIdx <= dragOverIdx.idx
+                                    ? "translate-y-1.5"
+                                    : dragInfo.from > dragOverIdx.idx && foodIdx >= dragOverIdx.idx && foodIdx < dragInfo.from
+                                      ? "-translate-y-1.5"
+                                      : ""
+                                  : ""
+                              )}
+                              onDragEnter={() => {
+                                handleDragEnterItem(mealIdx, foodIdx);
+                                setDragOverIdx({ mealIdx, idx: foodIdx });
+                              }}
+                              onDragOver={(e) => {
+                                handleDragOver(e);
+                                setDragOverIdx({ mealIdx, idx: foodIdx });
+                              }}
+                            >
+                              <div>
+                                <div className="font-medium">{item.name}</div>
+                                <div className="text-slate-500">{item.quantity}</div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  draggable
+                                  onDragStart={(e) => handleDragStart(e, mealIdx, foodIdx)}
+                                  onDragOver={handleDragOver}
+                                  onDrop={(e) => handleDrop(e, mealIdx, foodIdx)}
+                                  onDragEnd={handleDragEnd}
+                                  className="cursor-grab"
+                                  title="Arrastar para reordenar"
+                                >
+                                  <GripVertical className="h-4 w-4 text-slate-400" />
+                                </div>
+                                <button
+                                  onClick={() => removeFoodFromMeal(mealIdx, foodIdx)}
+                                  className="text-red-500 hover:text-red-700"
+                                  title="Remover alimento"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {meal.items.length === 0 && (
+                        <p className="text-sm italic text-slate-400">Nenhum alimento adicionado</p>
+                      )}
+
+                      {editingMealIdx !== mealIdx && (
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <Input
+                            placeholder="Alimento (ex: Arroz)"
+                            value={getFoodInput(mealIdx).name}
+                            onChange={(e) => setFoodInput(mealIdx, e.target.value, getFoodInput(mealIdx).qty)}
+                          />
+                          <Input
+                            placeholder="Quantidade (ex: 100g)"
+                            value={getFoodInput(mealIdx).qty}
+                            onChange={(e) => setFoodInput(mealIdx, getFoodInput(mealIdx).name, e.target.value)}
+                          />
+                          <Button onClick={() => addFoodToMeal(mealIdx)}>
+                            <Plus className="mr-1 h-4 w-4" />
+                            Adicionar
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          )}
 
-            {selectedPatient && (
-              <div className="rounded-md bg-blue-50 p-3 border border-blue-200">
-                <p className="text-sm text-blue-700">
-                  <strong>Paciente selecionado:</strong> {selectedPatient.name}
-                </p>
+            {currentPlan?.meals.length === 0 && (
+              <div className="py-8 text-center">
+                <p className="text-slate-500">Adicione refeições ao plano acima</p>
               </div>
             )}
 
-            <div>
-              <label className="text-sm font-medium text-slate-700">Título do plano</label>
-              <Input
-                className="mt-1"
-                placeholder="Ex: Plano de ganho de massa"
-                value={currentPlan?.title ?? ""}
-                onChange={(e) => {
-                  if (!selectedPatientId) return;
-                  updateCurrentPlan((plan) => ({ ...plan, title: e.target.value }));
-                }}
-              />
+            <AlertDialog open={mealToDeleteIdx !== null} onOpenChange={(open) => { if (!open) setMealToDeleteIdx(null); }}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza que deseja excluir esta refeição?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação removerá a refeição e todos os alimentos adicionados a ela. Esta operação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <AlertDialogCancel onClick={cancelRemoveMeal}>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmRemoveMeal}>Excluir</AlertDialogAction>
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => navigate("/dashboard")}
+                className="flex-1"
+                size="lg"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={activatePlan}
+                className="flex-1"
+                size="lg"
+              >
+                Ativar plano
+              </Button>
             </div>
-
-            <div>
-              <label className="text-sm font-medium text-slate-700">Observações (opcional)</label>
-              <Textarea className="mt-1" placeholder="Ex: Aumentar ingestão de proteína..." />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Refeições</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-2">
-              <div>
-                <label className="text-sm font-medium text-slate-700">Nome da refeição</label>
-                <Input
-                  className="mt-1"
-                  placeholder="Ex: Café da manhã"
-                  value={mealName}
-                  onChange={(e) => setMealName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-slate-700">Horário</label>
-                <Input
-                  className="mt-1"
-                  placeholder="08:00"
-                  type="time"
-                  value={mealTime}
-                  onChange={(e) => setMealTime(e.target.value)}
-                />
-              </div>
-            </div>
-            <Button onClick={addMeal} className="w-full" size="lg">
-              <Plus className="mr-2 h-4 w-4" />
-              Adicionar refeição
-            </Button>
-          </CardContent>
-        </Card>
-
-        {currentPlan?.meals.length > 0 && (
-          <div className="space-y-4">
-            {currentPlan?.meals.map((meal, mealIdx) => (
-              <Card key={meal.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    {editingMealIdx === mealIdx ? (
-                      <div className="flex-1 space-y-2">
-                        <Input
-                          placeholder="Nome da refeição"
-                          value={editMealName}
-                          onChange={(e) => setEditMealName(e.target.value)}
-                        />
-                        <Input
-                          placeholder="Horário"
-                          type="time"
-                          value={editMealTime}
-                          onChange={(e) => setEditMealTime(e.target.value)}
-                        />
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => saveEditMeal(mealIdx)}
-                          >
-                            Salvar
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={cancelEditMeal}
-                          >
-                            Cancelar
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div>
-                        <h3 className="text-lg font-semibold">{meal.name}</h3>
-                        <p className="text-sm text-slate-500">{meal.time}</p>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      {editingMealIdx !== mealIdx && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => startEditMeal(mealIdx)}
-                          title="Editar refeição"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      )}
-                      {editingMealIdx !== mealIdx && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setMealToDeleteIdx(mealIdx)}
-                          title="Remover refeição"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-                <Separator />
-                <CardContent className="pt-4">
-                  <div className="space-y-3">
-                    {meal.items.length > 0 && (
-                      <div className="bg-slate-50 rounded-lg p-3 space-y-2">
-                        {meal.items.map((item, foodIdx) => (
-                          <div
-                            key={item.id}
-                            className={cn(
-                              "flex items-center justify-between text-sm rounded-md px-2 py-2 transition-all duration-200",
-                              dragInfo && dragInfo.mealIdx === mealIdx && dragInfo.from === foodIdx
-                                ? "bg-sky-100 ring-2 ring-sky-400 shadow-md scale-[1.01] opacity-75"
-                                : "",
-                              dragInfo && dragOverIdx && dragInfo.mealIdx === mealIdx
-                                ? dragInfo.from < dragOverIdx.idx && foodIdx > dragInfo.from && foodIdx <= dragOverIdx.idx
-                                  ? "translate-y-1.5"
-                                  : dragInfo.from > dragOverIdx.idx && foodIdx >= dragOverIdx.idx && foodIdx < dragInfo.from
-                                    ? "-translate-y-1.5"
-                                    : ""
-                                : ""
-                            )}
-                            onDragEnter={() => {
-                              handleDragEnterItem(mealIdx, foodIdx);
-                              setDragOverIdx({ mealIdx, idx: foodIdx });
-                            }}
-                            onDragOver={(e) => {
-                              handleDragOver(e);
-                              setDragOverIdx({ mealIdx, idx: foodIdx });
-                            }}
-                          >
-                            <div>
-                              <div className="font-medium">{item.name}</div>
-                              <div className="text-slate-500">{item.quantity}</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div
-                                draggable
-                                onDragStart={(e) => handleDragStart(e, mealIdx, foodIdx)}
-                                onDragOver={handleDragOver}
-                                onDrop={(e) => handleDrop(e, mealIdx, foodIdx)}
-                                onDragEnd={handleDragEnd}
-                                className="cursor-grab"
-                                title="Arrastar para reordenar"
-                              >
-                                <GripVertical className="h-4 w-4 text-slate-400" />
-                              </div>
-                              <button
-                                onClick={() => removeFoodFromMeal(mealIdx, foodIdx)}
-                                className="text-red-500 hover:text-red-700"
-                                title="Remover alimento"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {meal.items.length === 0 && (
-                      <p className="text-sm text-slate-400 italic">Nenhum alimento adicionado</p>
-                    )}
-
-                    {editingMealIdx !== mealIdx && (
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <Input
-                        placeholder="Alimento (ex: Arroz)"
-                        value={getFoodInput(mealIdx).name}
-                        onChange={(e) => setFoodInput(mealIdx, e.target.value, getFoodInput(mealIdx).qty)}
-                      />
-                      <Input
-                        placeholder="Quantidade (ex: 100g)"
-                        value={getFoodInput(mealIdx).qty}
-                        onChange={(e) => setFoodInput(mealIdx, getFoodInput(mealIdx).name, e.target.value)}
-                      />
-                      <Button onClick={() => addFoodToMeal(mealIdx)}>
-                        <Plus className="mr-1 h-4 w-4" />
-                        Adicionar
-                      </Button>
-                    </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
           </div>
-        )}
-
-        {currentPlan?.meals.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-slate-500">Adicione refeições ao plano acima</p>
-          </div>
-        )}
-
-        <AlertDialog open={mealToDeleteIdx !== null} onOpenChange={(open) => { if (!open) setMealToDeleteIdx(null); }}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Tem certeza que deseja excluir esta refeição?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Esta ação removerá a refeição e todos os alimentos adicionados a ela. Esta operação não pode ser desfeita.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="mt-4 flex items-center justify-end gap-2">
-              <AlertDialogCancel onClick={cancelRemoveMeal}>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmRemoveMeal}>Excluir</AlertDialogAction>
-            </div>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={saveDraft}
-            className="flex-1"
-            size="lg"
-          >
-            Salvar rascunho
-          </Button>
-          <Button
-            onClick={activatePlan}
-            className="flex-1"
-            size="lg"
-          >
-            Ativar plano
-          </Button>
-        </div>
+        </main>
       </div>
     </div>
   );

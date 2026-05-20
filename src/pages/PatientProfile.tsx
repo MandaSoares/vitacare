@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Calendar, Mail, Phone, User } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { NutritionistSidebar } from "@/components/layout/NutritionistSidebar";
 
 import { mockPatients } from "@/lib/patients";
 
@@ -21,8 +23,11 @@ const PatientProfile = () => {
 
   if (!patient) {
     return (
-      <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-3xl">
+      <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+        <div className="grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]">
+          <NutritionistSidebar />
+          <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
+          <div className="w-full space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Paciente não encontrado</CardTitle>
@@ -34,16 +39,23 @@ const PatientProfile = () => {
               <Button onClick={() => navigate("/patients")}>Voltar para pacientes</Button>
             </CardContent>
           </Card>
+          </div>
+          </main>
         </div>
-      </main>
+      </div>
     );
   }
 
   const statusInfo = PLAN_STATUS.find((status) => status.value === patient.planStatus);
+  const { user } = useAuth();
+  const isNutritionistView = user?.role === "nutritionist";
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-5xl space-y-6">
+    <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+      <div className="grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]">
+        <NutritionistSidebar />
+        <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
+          <div className="w-full space-y-6">
         <Link
           to="/patients"
           className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -120,18 +132,20 @@ const PatientProfile = () => {
             )}
 
             <div className="flex flex-wrap gap-3 pt-2">
-              <Button>Agendar Consulta</Button>
+              {!isNutritionistView && <Button>Agendar Consulta</Button>}
               <Button variant="outline" asChild>
                 <Link to={`/patients/${patientId}/plan`}>Ver plano nutricional</Link>
               </Button>
-              <Button variant="ghost" onClick={() => navigate("/patients")}>
-                Voltar para a lista
-              </Button>
+              {!isNutritionistView && (
+                <Button variant="ghost" onClick={() => navigate("/patients")}>Voltar para a lista</Button>
+              )}
             </div>
           </CardContent>
         </Card>
+          </div>
+        </main>
       </div>
-    </main>
+    </div>
   );
 };
 

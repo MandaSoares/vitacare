@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Search, User, Calendar, AlertCircle } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Search, User, Calendar, AlertCircle, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { mockPatients, type Patient } from "@/lib/patients";
+import { NutritionistSidebar } from "@/components/layout/NutritionistSidebar";
 
 const PLAN_STATUS = [
   { value: "active", label: "Plano ativo", color: "bg-green-100 text-green-800" },
@@ -92,7 +93,7 @@ const PatientCard = ({ patient, onViewProfile }: { patient: Patient; onViewProfi
         )}
 
         {/* Action Button */}
-        <Button className="w-full" onClick={(e) => {
+        <Button className="w-full justify-center gap-2 rounded-2xl bg-emerald-700 text-white hover:bg-emerald-800" onClick={(e) => {
           e.stopPropagation();
           onViewProfile(patient);
         }}>
@@ -150,15 +151,20 @@ export const PatientSearch = () => {
 
   return (
     <TooltipProvider>
-      <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-7xl space-y-8">
+      <div className="min-h-screen bg-[#f3f5f4] text-slate-900">
+        <div className="grid min-h-screen lg:grid-cols-[224px_minmax(0,1fr)]">
+          <NutritionistSidebar />
+          <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.08),_transparent_34%),linear-gradient(180deg,_#fafafa_0%,_#f3f7f4_100%)] px-4 py-8 text-foreground sm:px-6 lg:px-8 lg:pl-12">
+            <div className="w-full space-y-8">
           {/* Header */}
           <div className="space-y-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Meus Pacientes</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Gerenciamento de pacientes cadastrados na plataforma
-              </p>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Meus Pacientes</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gerenciamento de pacientes cadastrados na plataforma
+                </p>
+              </div>
             </div>
 
             {/* Search Bar */}
@@ -203,56 +209,35 @@ export const PatientSearch = () => {
                     </Badge>
                   );
                 })}
-                <Button variant="ghost" size="sm" className="h-8 px-2" onClick={clearFilters}>
+                      <Button variant="outline" size="sm" className="h-8 rounded-2xl border-emerald-200 text-emerald-800 hover:bg-emerald-100 hover:text-emerald-900" onClick={clearFilters}>
                   Limpar tudo
                 </Button>
               </div>
             )}
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
-            {/* Sidebar Filters */}
-            <div className="lg:col-span-1">
-              <Card className="sticky top-4">
-                <CardHeader>
-                  <CardTitle className="text-base">Filtros</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Status Filter */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-semibold">Status do plano</p>
-                    <div className="space-y-2">
-                      {PLAN_STATUS.map((status) => (
-                        <label key={status.value} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedStatuses.includes(status.value)}
-                            onChange={() => toggleStatus(status.value)}
-                            className="h-4 w-4 rounded"
-                          />
-                          <span className="text-sm">{status.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+          <div className="space-y-4">
+            {/* Inline status filter buttons */}
+            <div className="flex items-center gap-3">
+              {PLAN_STATUS.map((status) => (
+                <button
+                  key={status.value}
+                  onClick={() => toggleStatus(status.value)}
+                  className={`h-8 rounded-full px-3 text-sm font-medium transition-colors ${selectedStatuses.includes(status.value) ? 'bg-emerald-700 text-white' : 'border border-emerald-200 text-emerald-800 bg-white'}`}
+                >
+                  {status.label}
+                </button>
+              ))}
 
-                  {/* Clear Filters */}
-                  {hasActiveFilters && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={clearFilters}
-                    >
-                      Limpar Filtros
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              {hasActiveFilters && (
+                <Button variant="outline" size="sm" className="ml-auto h-8 rounded-2xl border-emerald-200 text-emerald-800 hover:bg-emerald-100 hover:text-emerald-900" onClick={clearFilters}>
+                  Limpar tudo
+                </Button>
+              )}
             </div>
 
             {/* Results Grid */}
-            <div className="lg:col-span-3">
+            <div>
               {filteredPatients.length > 0 ? (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
@@ -290,7 +275,7 @@ export const PatientSearch = () => {
                       )}
                     </div>
                     {hasActiveFilters && (
-                      <Button variant="outline" size="sm" onClick={clearFilters}>
+                      <Button variant="outline" size="sm" className="rounded-2xl border-emerald-200 text-emerald-800 hover:bg-emerald-100 hover:text-emerald-900" onClick={clearFilters}>
                         Limpar todos os filtros
                       </Button>
                     )}
@@ -298,10 +283,11 @@ export const PatientSearch = () => {
                 </Card>
               )}
             </div>
+            </div>
           </div>
-
+          </main>
         </div>
-      </main>
+      </div>
     </TooltipProvider>
   );
 };
